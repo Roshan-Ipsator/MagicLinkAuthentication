@@ -9,8 +9,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
+import com.ipsator.MagicLinkAuthentication_System.Exception.UserException;
+import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Record.RegisterUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Service.UserService;
+
+import jakarta.mail.MessagingException;
 
 @RestController
 @RequestMapping("/ipsator.com/user")
@@ -19,8 +23,13 @@ public class UserController {
 	private UserService userService;
 
 	@PostMapping
-	public ResponseEntity<User> registerUser(@RequestBody RegisterUserRecord registerUserDto) {
-		User savedUser = userService.registerUser(registerUserDto);
+	public ResponseEntity<User> registerUser(@RequestBody RegisterUserRecord registerUserRecord) {
+		User savedUser = userService.registerUser(registerUserRecord);
 		return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+	}
+	
+	@PostMapping("/send-verify-email")
+	public ResponseEntity<String> sendVerifyEmail(@RequestBody LoginUserRecord loginUserRecord) throws UserException, MessagingException{
+		return new ResponseEntity<String>(userService.sendVerifyEmail(loginUserRecord), HttpStatus.OK);
 	}
 }
