@@ -1,5 +1,7 @@
 package com.ipsator.MagicLinkAuthentication_System.Entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
@@ -10,12 +12,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class User {
+public class LoginKeys {
 	@Id
-	private Integer id;
-	private String firstName;
-	private String lastName;
-	private String emailId;
-	private String gender;
-	private Integer age;
+	private Integer userId;
+	private String loginKey;
+	private LocalDateTime keyGenerationTime;
 }
