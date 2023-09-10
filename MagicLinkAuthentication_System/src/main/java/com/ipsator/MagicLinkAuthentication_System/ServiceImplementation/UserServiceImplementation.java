@@ -9,6 +9,7 @@ import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Record.RegisterUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Repository.UserRepository;
 import com.ipsator.MagicLinkAuthentication_System.Service.UserService;
+import com.ipsator.MagicLinkAuthentication_System.Utility.JwtUtil;
 
 import jakarta.mail.MessagingException;
 
@@ -43,12 +44,21 @@ public class UserServiceImplementation implements UserService {
 		if (existingUser == null) {
 			throw new UserException("Email Id is not registered. Please, sign up first!");
 		}
+		
+		String token = JwtUtil.generateToken(loginUserRecord.emailId());
+		
 		String to = loginUserRecord.emailId();
 		String subject = "Check out this URL to verify";
-		String url = "https://drive.google.com/file/d/1cVdOHxChQefgr70Nm69S0axmJTSW3THA/view?usp=sharing";
+		String url = token;
 
 		emailServiceImplementation.sendEmailWithUrl(to, subject, url);
 
-		return "email-sent";
+//		return "email-sent";
+		return token;
+	}
+
+	@Override
+	public String sendHello() {
+		return "hi";
 	}
 }

@@ -11,4 +11,6 @@ public interface UserService {
 	public User registerUser(RegisterUserRecord registerUserRecord) throws UserException;
 	
 	public String sendVerifyEmail(LoginUserRecord loginUserRecord) throws UserException, MessagingException;
+	
+	public String sendHello();
 }
