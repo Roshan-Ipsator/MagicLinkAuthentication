@@ -10,6 +10,12 @@ import org.thymeleaf.context.Context;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
+/**
+ * A class that contains the method to send the verify email to the user's account
+ * 
+ * @author Roshan
+ *
+ */
 @Service
 public class EmailServiceImplementation {
 	@Autowired
@@ -17,7 +23,18 @@ public class EmailServiceImplementation {
 
 	@Autowired
 	private TemplateEngine templateEngine;
-
+	
+	/**
+	 * The method to send verify url to the user's email
+	 * 
+	 * @param to the destination email id
+	 * @param subject subject line for the email
+	 * @param url the url containing the login confirmation API
+	 * 
+	 * @return void
+	 * 
+	 * @throws MessagingException
+	 */
 	public void sendEmailWithUrl(String to, String subject, String url) throws MessagingException {
 		MimeMessage message = emailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, true);

@@ -8,6 +8,12 @@ import com.ipsator.MagicLinkAuthentication_System.Record.RegisterUserRecord;
 
 import jakarta.mail.MessagingException;
 
+/**
+ * The interface containing all the abstract method declarations for all functionalities 
+ * 
+ * @author Roshan
+ *
+ */
 public interface UserService {
 	public TemporaryUsers registerUserInit(RegisterUserRecord registerUserRecord)
 			throws UserException, MessagingException;
