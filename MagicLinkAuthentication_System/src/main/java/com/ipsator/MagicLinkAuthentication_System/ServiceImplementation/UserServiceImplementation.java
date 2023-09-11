@@ -24,6 +24,12 @@ import com.ipsator.MagicLinkAuthentication_System.Utility.JwtUtil;
 
 import jakarta.mail.MessagingException;
 
+/**
+ * The implementation class of UserService interface
+ * 
+ * @author Roshan
+ *
+ */
 @Service
 public class UserServiceImplementation implements UserService {
 	@Autowired
@@ -38,6 +44,17 @@ public class UserServiceImplementation implements UserService {
 	@Autowired
 	private EmailServiceImplementation emailServiceImplementation;
 
+	/**
+	 * 
+	 * The method to temporarily register a user before final verification
+	 * 
+	 * @param registerUserRecord object of RegisterUserRecord class
+	 * 
+	 * @return temporaryUser object
+	 * 
+	 * @throws UserException, MessagingException
+	 * 
+	 */
 	@Override
 	public TemporaryUsers registerUserInit(RegisterUserRecord registerUserRecord)
 			throws UserException, MessagingException {
@@ -57,13 +74,24 @@ public class UserServiceImplementation implements UserService {
 
 		String to = registerUserRecord.emailId();
 		String subject = "Check out this URL to complete your registration.";
-		String url = "http://localhost:8659/ipsator.com/user/finalRegistration?registrationKey="+registrationKey;
+		String url = "http://localhost:8659/ipsator.com/user/finalRegistration?registrationKey=" + registrationKey;
 
 		emailServiceImplementation.sendEmailWithUrl(to, subject, url);
 
 		return temporaryUsersRepository.save(newTemporaryUser);
 	}
 
+	/**
+	 * 
+	 * The method to finally register a user after final verification
+	 * 
+	 * @param registrationKey a string to verify the user for complete registration
+	 * 
+	 * @return User object
+	 * 
+	 * @throws UserException
+	 * 
+	 */
 	@Override
 	public User registerUserFinal(String registrationKey) throws UserException {
 		TemporaryUsers existingTemporaryUser = temporaryUsersRepository.findByRegistrationKey(registrationKey);
@@ -75,7 +103,7 @@ public class UserServiceImplementation implements UserService {
 			newUser.setEmailId(existingTemporaryUser.getEmailId());
 			newUser.setGender(existingTemporaryUser.getGender());
 			newUser.setAge(existingTemporaryUser.getAge());
-			
+
 			temporaryUsersRepository.delete(existingTemporaryUser);
 
 			return userRepository.save(newUser);
@@ -84,6 +112,17 @@ public class UserServiceImplementation implements UserService {
 		throw new UserException("Invalid key. Please try with a valid key or try registring once again.");
 	}
 
+	/**
+	 * 
+	 * The method to send a verification email for the final login
+	 * 
+	 * @param loginUserRecord object of LoginUserRecord contains the user's email id
+	 * 
+	 * @return loginKey a string to verify the user for final login
+	 * 
+	 * @throws UserException, MessagingException
+	 * 
+	 */
 	@Override
 	public String sendVerifyEmail(LoginUserRecord loginUserRecord) throws UserException, MessagingException {
 		User existingUser = userRepository.findByEmailId(loginUserRecord.emailId());
@@ -102,31 +141,49 @@ public class UserServiceImplementation implements UserService {
 
 		String to = loginUserRecord.emailId();
 		String subject = "Check out this URL to verify";
-		String url = "http://localhost:8659/ipsator.com/user/finalLogin?loginKey="+loginKey;
+		String url = "http://localhost:8659/ipsator.com/user/finalLogin?loginKey=" + loginKey;
 
 		emailServiceImplementation.sendEmailWithUrl(to, subject, url);
 
-		return "email-sent. Login Key: "+loginKey ;
+		return "email-sent. Login Key: " + loginKey;
 //		return token;
 	}
 
+	/**
+	 * 
+	 * The method for the final login after final login verification
+	 * 
+	 * @param loginKey a string to verify the user for final login
+	 * 
+	 * @return User object
+	 * 
+	 * @throws UserException
+	 * 
+	 */
 	@Override
 	public User userLoginFinal(String loginKey) throws UserException {
 		LoginKeys existingLoginKey = loginKeysRepository.findByLoginKey(loginKey);
-		if(existingLoginKey!=null) {
+		if (existingLoginKey != null) {
 			long noOfMinutes = existingLoginKey.getKeyGenerationTime().until(LocalDateTime.now(), ChronoUnit.MINUTES);
 
-			if(noOfMinutes>15) {
+			if (noOfMinutes > 15) {
 				throw new UserException("Login Key expired. Please, try again!");
 			}
-			
+
 			User existingUser = userRepository.findById(existingLoginKey.getUserId()).get();
-			
+
 			return existingUser;
 		}
 		throw new UserException("Invalid login key. Please, try again!");
 	}
 
+	/**
+	 * 
+	 * The method to use in the testing API that returns a string for confirmation
+	 * 
+	 * @return hi --> a String
+	 * 
+	 */
 	@Override
 	public String sendHello() {
 		return "hi";
