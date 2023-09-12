@@ -109,7 +109,7 @@ public class UserServiceImplementation implements UserService {
 	 * 
 	 */
 	@Override
-	public User registerUserFinal(String registrationKey) throws UserException {
+	public ServiceResponse<Object> registerUserFinal(String registrationKey) {
 		PreFinalUserRegistration existingTemporaryUser = temporaryUsersRepository
 				.findByRegistrationKey(registrationKey);
 		if (existingTemporaryUser != null) {
@@ -132,10 +132,19 @@ public class UserServiceImplementation implements UserService {
 
 			temporaryUsersRepository.save(existingTemporaryUser);
 
-			return userRepository.save(newUser);
+			// return userRepository.save(newUser);
+			
+			User savedUser = userRepository.save(newUser);
+			Map data = new HashMap();
+			data.put("user", savedUser);
+			ServiceResponse<Object> response = new ServiceResponse<>(true, data, "User registered successfully.");
+			return response;
 		}
 
-		throw new UserException("Invalid key. Please try with a valid key or try registring once again.");
+		// throw new UserException("Invalid key. Please try with a valid key or try registering once again.");
+		
+		ServiceResponse<Object> response = new ServiceResponse<>(false, null, "Invalid key. Please try with a valid key or try registering once again.");
+		return response;
 	}
 
 	/**

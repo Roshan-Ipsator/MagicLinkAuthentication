@@ -53,9 +53,12 @@ public class UserController {
 	}
 	
 	@GetMapping("/finalRegistration")
-	public ResponseEntity<User> registerUserFinal(@RequestParam String registrationKey) {
-		User savedUser = userService.registerUserFinal(registrationKey);
-		return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+	public ResponseEntity<ApiResponse> registerUserFinal(@RequestParam String registrationKey) {
+		ServiceResponse<Object> savedUser = userService.registerUserFinal(registrationKey);
+		if(savedUser.getSuccess()) {
+			return new ResponseEntity<>(new ApiResponse("success",savedUser.getData(),null), HttpStatus.CREATED);
+		}
+		return new ResponseEntity<>(new ApiResponse("error",null,new Error(savedUser.getMessage())), HttpStatus.BAD_REQUEST);
 	}
 	
 	@PostMapping("/send-verify-email")
