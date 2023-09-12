@@ -1,6 +1,6 @@
 package com.ipsator.MagicLinkAuthentication_System.Service;
 
-import com.ipsator.MagicLinkAuthentication_System.Entity.TemporaryUsers;
+import com.ipsator.MagicLinkAuthentication_System.Entity.PreFinalUserRegistration;
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
 import com.ipsator.MagicLinkAuthentication_System.Exception.UserException;
 import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
@@ -15,7 +15,7 @@ import jakarta.mail.MessagingException;
  *
  */
 public interface UserService {
-	public TemporaryUsers registerUserInit(RegisterUserRecord registerUserRecord)
+	public PreFinalUserRegistration registerUserInit(RegisterUserRecord registerUserRecord)
 			throws UserException, MessagingException;
 
 	public User registerUserFinal(String registrationKey) throws UserException;

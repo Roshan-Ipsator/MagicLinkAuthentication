@@ -4,14 +4,14 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
-import javax.security.auth.login.LoginException;
-
-import org.springframework.beans.factory.annotation.Autowire;
+//import javax.security.auth.login.LoginException;
+//
+//import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ipsator.MagicLinkAuthentication_System.Entity.LoginKeys;
-import com.ipsator.MagicLinkAuthentication_System.Entity.TemporaryUsers;
+import com.ipsator.MagicLinkAuthentication_System.Entity.PreFinalUserRegistration;
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
 import com.ipsator.MagicLinkAuthentication_System.Exception.UserException;
 import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
@@ -20,7 +20,7 @@ import com.ipsator.MagicLinkAuthentication_System.Repository.LoginKeysRepository
 import com.ipsator.MagicLinkAuthentication_System.Repository.TemporaryUsersRepository;
 import com.ipsator.MagicLinkAuthentication_System.Repository.UserRepository;
 import com.ipsator.MagicLinkAuthentication_System.Service.UserService;
-import com.ipsator.MagicLinkAuthentication_System.Utility.JwtUtil;
+//import com.ipsator.MagicLinkAuthentication_System.Utility.JwtUtil;
 
 import jakarta.mail.MessagingException;
 
@@ -42,7 +42,10 @@ public class UserServiceImplementation implements UserService {
 	private LoginKeysRepository loginKeysRepository;
 
 	@Autowired
-	private EmailServiceImplementation emailServiceImplementation;
+	private LoginEmailServiceImplementation loginEmailServiceImplementation;
+
+	@Autowired
+	private SignupEmailServiceImplementation signupEmailServiceImplementation;
 
 	/**
 	 * 
@@ -56,14 +59,14 @@ public class UserServiceImplementation implements UserService {
 	 * 
 	 */
 	@Override
-	public TemporaryUsers registerUserInit(RegisterUserRecord registerUserRecord)
+	public PreFinalUserRegistration registerUserInit(RegisterUserRecord registerUserRecord)
 			throws UserException, MessagingException {
 		User existingUser = userRepository.findByEmailId(registerUserRecord.emailId());
 		if (existingUser != null) {
 			throw new UserException("Email Id already exists. Please, directly log in!");
 		}
 
-		TemporaryUsers newTemporaryUser = new TemporaryUsers();
+		PreFinalUserRegistration newTemporaryUser = new PreFinalUserRegistration();
 		newTemporaryUser.setFirstName(registerUserRecord.firstName());
 		newTemporaryUser.setLastName(registerUserRecord.lastName());
 		newTemporaryUser.setEmailId(registerUserRecord.emailId());
@@ -71,12 +74,14 @@ public class UserServiceImplementation implements UserService {
 		newTemporaryUser.setAge(registerUserRecord.age());
 		String registrationKey = UUID.randomUUID().toString();
 		newTemporaryUser.setRegistrationKey(registrationKey);
+		newTemporaryUser.setKeyGenerationTime(LocalDateTime.now());
+		newTemporaryUser.setUserStatus("Verification Pending");
 
 		String to = registerUserRecord.emailId();
 		String subject = "Check out this URL to complete your registration.";
 		String url = "http://localhost:8659/ipsator.com/user/finalRegistration?registrationKey=" + registrationKey;
 
-		emailServiceImplementation.sendEmailWithUrl(to, subject, url);
+		signupEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
 
 		return temporaryUsersRepository.save(newTemporaryUser);
 	}
@@ -94,17 +99,27 @@ public class UserServiceImplementation implements UserService {
 	 */
 	@Override
 	public User registerUserFinal(String registrationKey) throws UserException {
-		TemporaryUsers existingTemporaryUser = temporaryUsersRepository.findByRegistrationKey(registrationKey);
+		PreFinalUserRegistration existingTemporaryUser = temporaryUsersRepository
+				.findByRegistrationKey(registrationKey);
 		if (existingTemporaryUser != null) {
+			long noOfMinutes = existingTemporaryUser.getKeyGenerationTime().until(LocalDateTime.now(),
+					ChronoUnit.MINUTES);
+
+			if (noOfMinutes > 15) {
+				throw new UserException("Registration key has expired. Please try again!");
+			}
+
 			User newUser = new User();
-			newUser.setId(existingTemporaryUser.getId());
+			newUser.setUserId(existingTemporaryUser.getUserId());
 			newUser.setFirstName(existingTemporaryUser.getFirstName());
 			newUser.setLastName(existingTemporaryUser.getLastName());
 			newUser.setEmailId(existingTemporaryUser.getEmailId());
 			newUser.setGender(existingTemporaryUser.getGender());
 			newUser.setAge(existingTemporaryUser.getAge());
 
-			temporaryUsersRepository.delete(existingTemporaryUser);
+			existingTemporaryUser.setUserStatus("Verified");
+
+			temporaryUsersRepository.save(existingTemporaryUser);
 
 			return userRepository.save(newUser);
 		}
@@ -134,7 +149,7 @@ public class UserServiceImplementation implements UserService {
 
 		LoginKeys newLoginKey = new LoginKeys();
 		String loginKey = UUID.randomUUID().toString();
-		newLoginKey.setUserId(existingUser.getId());
+		newLoginKey.setUserId(existingUser.getUserId());
 		newLoginKey.setLoginKey(loginKey);
 		newLoginKey.setKeyGenerationTime(LocalDateTime.now());
 		loginKeysRepository.save(newLoginKey);
@@ -143,7 +158,7 @@ public class UserServiceImplementation implements UserService {
 		String subject = "Check out this URL to verify";
 		String url = "http://localhost:8659/ipsator.com/user/finalLogin?loginKey=" + loginKey;
 
-		emailServiceImplementation.sendEmailWithUrl(to, subject, url);
+		loginEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
 
 		return "email-sent. Login Key: " + loginKey;
 //		return token;

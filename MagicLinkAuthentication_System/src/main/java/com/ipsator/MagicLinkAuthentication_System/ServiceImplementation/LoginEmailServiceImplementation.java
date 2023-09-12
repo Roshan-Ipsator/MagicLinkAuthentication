@@ -17,7 +17,7 @@ import jakarta.mail.internet.MimeMessage;
  *
  */
 @Service
-public class EmailServiceImplementation {
+public class LoginEmailServiceImplementation {
 	@Autowired
 	private JavaMailSender emailSender;
 
@@ -44,7 +44,7 @@ public class EmailServiceImplementation {
 		context.setVariable("url", url);
 
 		// Process the HTML email template
-		String htmlContent = templateEngine.process("email-template", context);
+		String htmlContent = templateEngine.process("login-email-template", context);
 
 		helper.setTo(to);
 		helper.setSubject(subject);
