@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ipsator.MagicLinkAuthentication_System.Entity.TemporaryUsers;
+import com.ipsator.MagicLinkAuthentication_System.Entity.PreFinalUserRegistration;
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
 import com.ipsator.MagicLinkAuthentication_System.Exception.UserException;
 import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
@@ -41,8 +41,8 @@ public class UserController {
 	}
 
 	@PostMapping
-	public ResponseEntity<TemporaryUsers> registerUserInit(@RequestBody RegisterUserRecord registerUserRecord) throws UserException, MessagingException {
-		TemporaryUsers savedTemporaryUser = userService.registerUserInit(registerUserRecord);
+	public ResponseEntity<PreFinalUserRegistration> registerUserInit(@RequestBody RegisterUserRecord registerUserRecord) throws UserException, MessagingException {
+		PreFinalUserRegistration savedTemporaryUser = userService.registerUserInit(registerUserRecord);
 		return new ResponseEntity<>(savedTemporaryUser, HttpStatus.CREATED);
 	}
 	
