@@ -2,6 +2,8 @@ package com.ipsator.MagicLinkAuthentication_System.ServiceImplementation;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 //import javax.security.auth.login.LoginException;
@@ -14,12 +16,12 @@ import com.ipsator.MagicLinkAuthentication_System.Entity.LoginKeys;
 import com.ipsator.MagicLinkAuthentication_System.Entity.PreFinalUserRegistration;
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
 import com.ipsator.MagicLinkAuthentication_System.Exception.UserException;
+import com.ipsator.MagicLinkAuthentication_System.Payload.ServiceResponse;
 import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Record.RegisterUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Repository.LoginKeysRepository;
 import com.ipsator.MagicLinkAuthentication_System.Repository.TemporaryUsersRepository;
 import com.ipsator.MagicLinkAuthentication_System.Repository.UserRepository;
-import com.ipsator.MagicLinkAuthentication_System.Response.ServiceResponse;
 import com.ipsator.MagicLinkAuthentication_System.Service.UserService;
 //import com.ipsator.MagicLinkAuthentication_System.Utility.JwtUtil;
 
@@ -60,12 +62,12 @@ public class UserServiceImplementation implements UserService {
 	 * 
 	 */
 	@Override
-	public ServiceResponse<PreFinalUserRegistration> registerUserInit(RegisterUserRecord registerUserRecord)
+	public ServiceResponse<Object> registerUserInit(RegisterUserRecord registerUserRecord)
 			throws MessagingException {
 		User existingUser = userRepository.findByEmailId(registerUserRecord.emailId());
 		if (existingUser != null) {
 			// throw new UserException("Email Id already exists. Please, directly log in!");
-			ServiceResponse<PreFinalUserRegistration> response = new ServiceResponse<>("error", null, "Email Id already exists. Please, directly log in!", "400");
+			ServiceResponse<Object> response = new ServiceResponse<>(false, null, "Email Id already exists. Please, directly log in!");
 			return response;
 		}
 
@@ -89,7 +91,9 @@ public class UserServiceImplementation implements UserService {
 		// return temporaryUsersRepository.save(newTemporaryUser);
 		
 		PreFinalUserRegistration savedTemporaryUser = temporaryUsersRepository.save(newTemporaryUser);
-		ServiceResponse<PreFinalUserRegistration> response = new ServiceResponse<>("success", savedTemporaryUser, "Temporarily created the user.", "201");
+		Map data = new HashMap();
+		data.put("user", savedTemporaryUser);
+		ServiceResponse<Object> response = new ServiceResponse<>(true, data, "Temporarily created the user.");
 		return response;
 	}
 
