@@ -19,7 +19,7 @@ public interface UserService {
 	public ServiceResponse<Object> registerUserInit(RegisterUserRecord registerUserRecord)
 			throws MessagingException;
 
-	public User registerUserFinal(String registrationKey) throws UserException;
+	public ServiceResponse<Object> registerUserFinal(String registrationKey);
 
 	public String sendVerifyEmail(LoginUserRecord loginUserRecord) throws UserException, MessagingException;
 	
