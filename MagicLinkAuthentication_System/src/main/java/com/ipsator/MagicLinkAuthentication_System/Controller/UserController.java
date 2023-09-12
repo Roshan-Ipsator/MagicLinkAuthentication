@@ -62,8 +62,12 @@ public class UserController {
 	}
 	
 	@PostMapping("/send-verify-email")
-	public ResponseEntity<String> sendVerifyEmail(@RequestBody LoginUserRecord loginUserRecord) throws UserException, MessagingException{
-		return new ResponseEntity<String>(userService.sendVerifyEmail(loginUserRecord), HttpStatus.OK);
+	public ResponseEntity<ApiResponse> sendVerifyEmail(@RequestBody LoginUserRecord loginUserRecord) throws MessagingException{
+		ServiceResponse<String> loginKeyConfirmation = userService.sendVerifyEmail(loginUserRecord);
+		if(loginKeyConfirmation.getSuccess()) {
+			return new ResponseEntity<>(new ApiResponse("success",loginKeyConfirmation.getData(),null), HttpStatus.OK);
+		}
+		return new ResponseEntity<>(new ApiResponse("error",null,new Error(loginKeyConfirmation.getMessage())), HttpStatus.BAD_REQUEST);
 	}
 	
 	@GetMapping("/finalLogin")

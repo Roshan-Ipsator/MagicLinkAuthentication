@@ -117,7 +117,9 @@ public class UserServiceImplementation implements UserService {
 					ChronoUnit.MINUTES);
 
 			if (noOfMinutes > 15) {
-				throw new UserException("Registration key has expired. Please try again!");
+				// throw new UserException("Registration key has expired. Please try again!");
+				ServiceResponse<Object> response = new ServiceResponse<>(false, null, "Registration key has expired. Please try again!");
+				return response;
 			}
 
 			User newUser = new User();
@@ -159,10 +161,12 @@ public class UserServiceImplementation implements UserService {
 	 * 
 	 */
 	@Override
-	public String sendVerifyEmail(LoginUserRecord loginUserRecord) throws UserException, MessagingException {
+	public ServiceResponse<String> sendVerifyEmail(LoginUserRecord loginUserRecord) throws MessagingException {
 		User existingUser = userRepository.findByEmailId(loginUserRecord.emailId());
 		if (existingUser == null) {
-			throw new UserException("Email Id is not registered. Please, sign up first!");
+			// throw new UserException("Email Id is not registered. Please, sign up first!");
+			ServiceResponse<String> response = new ServiceResponse<>(false, null, "Email Id is not registered. Please, sign up first!");
+			return response;
 		}
 
 //		String token = JwtUtil.generateToken(loginUserRecord.emailId());
@@ -180,8 +184,11 @@ public class UserServiceImplementation implements UserService {
 
 		loginEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
 
-		return "email-sent. Login Key: " + loginKey;
-//		return token;
+		// return "email-sent. Login Key: " + loginKey;
+		// return token;
+		ServiceResponse<String> response = new ServiceResponse<>(true, "email-sent. Login Key: " + loginKey, "Email sent with login key.");
+		return response;
+		
 	}
 
 	/**

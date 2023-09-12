@@ -10,20 +10,20 @@ import com.ipsator.MagicLinkAuthentication_System.Record.RegisterUserRecord;
 import jakarta.mail.MessagingException;
 
 /**
- * The interface containing all the abstract method declarations for all functionalities 
+ * The interface containing all the abstract method declarations for all
+ * functionalities
  * 
  * @author Roshan
  *
  */
 public interface UserService {
-	public ServiceResponse<Object> registerUserInit(RegisterUserRecord registerUserRecord)
-			throws MessagingException;
+	public ServiceResponse<Object> registerUserInit(RegisterUserRecord registerUserRecord) throws MessagingException;
 
 	public ServiceResponse<Object> registerUserFinal(String registrationKey);
 
-	public String sendVerifyEmail(LoginUserRecord loginUserRecord) throws UserException, MessagingException;
-	
-	public User userLoginFinal(String loginKey) throws UserException; 
+	public ServiceResponse<String> sendVerifyEmail(LoginUserRecord loginUserRecord) throws MessagingException;
+
+	public User userLoginFinal(String loginKey) throws UserException;
 
 	public String sendHello();
 }
