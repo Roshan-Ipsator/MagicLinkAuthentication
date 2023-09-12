@@ -13,11 +13,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ipsator.MagicLinkAuthentication_System.Entity.PreFinalUserRegistration;
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
 import com.ipsator.MagicLinkAuthentication_System.Exception.UserException;
+import com.ipsator.MagicLinkAuthentication_System.Payload.ApiResponse;
+import com.ipsator.MagicLinkAuthentication_System.Payload.Error;
+import com.ipsator.MagicLinkAuthentication_System.Payload.ServiceResponse;
 import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Record.RegisterUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Record.ValidateUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Repository.UserRepository;
-import com.ipsator.MagicLinkAuthentication_System.Response.ServiceResponse;
 import com.ipsator.MagicLinkAuthentication_System.Service.UserService;
 
 import io.jsonwebtoken.Claims;
@@ -42,9 +44,12 @@ public class UserController {
 	}
 
 	@PostMapping
-	public ResponseEntity<ServiceResponse<PreFinalUserRegistration>> registerUserInit(@RequestBody RegisterUserRecord registerUserRecord) throws MessagingException {
-		ServiceResponse<PreFinalUserRegistration> savedTemporaryUser = userService.registerUserInit(registerUserRecord);
-		return new ResponseEntity<>(savedTemporaryUser, HttpStatus.CREATED);
+	public ResponseEntity<ApiResponse> registerUserInit(@RequestBody RegisterUserRecord registerUserRecord) throws MessagingException {
+		ServiceResponse<Object> savedTemporaryUser = userService.registerUserInit(registerUserRecord);
+		if(savedTemporaryUser.getSuccess()) {
+			return new ResponseEntity<>(new ApiResponse("success",savedTemporaryUser.getData(),null), HttpStatus.CREATED);
+		}
+		return new ResponseEntity<>(new ApiResponse("error",null,new Error(savedTemporaryUser.getMessage())), HttpStatus.BAD_REQUEST);
 	}
 	
 	@GetMapping("/finalRegistration")
