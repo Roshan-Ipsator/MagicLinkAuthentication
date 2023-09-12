@@ -6,16 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-//import javax.security.auth.login.LoginException;
-//
-//import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ipsator.MagicLinkAuthentication_System.Entity.LoginKeys;
 import com.ipsator.MagicLinkAuthentication_System.Entity.PreFinalUserRegistration;
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
-import com.ipsator.MagicLinkAuthentication_System.Exception.UserException;
 import com.ipsator.MagicLinkAuthentication_System.Payload.ServiceResponse;
 import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Record.RegisterUserRecord;
@@ -23,7 +19,6 @@ import com.ipsator.MagicLinkAuthentication_System.Repository.LoginKeysRepository
 import com.ipsator.MagicLinkAuthentication_System.Repository.TemporaryUsersRepository;
 import com.ipsator.MagicLinkAuthentication_System.Repository.UserRepository;
 import com.ipsator.MagicLinkAuthentication_System.Service.UserService;
-//import com.ipsator.MagicLinkAuthentication_System.Utility.JwtUtil;
 
 import jakarta.mail.MessagingException;
 
@@ -66,7 +61,6 @@ public class UserServiceImplementation implements UserService {
 			throws MessagingException {
 		User existingUser = userRepository.findByEmailId(registerUserRecord.emailId());
 		if (existingUser != null) {
-			// throw new UserException("Email Id already exists. Please, directly log in!");
 			ServiceResponse<Object> response = new ServiceResponse<>(false, null, "Email Id already exists. Please, directly log in!");
 			return response;
 		}
@@ -87,13 +81,11 @@ public class UserServiceImplementation implements UserService {
 		String url = "http://localhost:8659/ipsator.com/user/finalRegistration?registrationKey=" + registrationKey;
 
 		signupEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
-
-		// return temporaryUsersRepository.save(newTemporaryUser);
 		
 		PreFinalUserRegistration savedTemporaryUser = temporaryUsersRepository.save(newTemporaryUser);
 		Map data = new HashMap();
 		data.put("user", savedTemporaryUser);
-		ServiceResponse<Object> response = new ServiceResponse<>(true, data, "Temporarily created the user.");
+		ServiceResponse<Object> response = new ServiceResponse<>(true, data, "Temporarily created the user. Registration verification link has been sent to the email. It will expire after 15 minutes.");
 		return response;
 	}
 
@@ -117,7 +109,6 @@ public class UserServiceImplementation implements UserService {
 					ChronoUnit.MINUTES);
 
 			if (noOfMinutes > 15) {
-				// throw new UserException("Registration key has expired. Please try again!");
 				ServiceResponse<Object> response = new ServiceResponse<>(false, null, "Registration key has expired. Please try again!");
 				return response;
 			}
@@ -133,8 +124,6 @@ public class UserServiceImplementation implements UserService {
 			existingTemporaryUser.setUserStatus("Verified");
 
 			temporaryUsersRepository.save(existingTemporaryUser);
-
-			// return userRepository.save(newUser);
 			
 			User savedUser = userRepository.save(newUser);
 			Map data = new HashMap();
@@ -142,8 +131,6 @@ public class UserServiceImplementation implements UserService {
 			ServiceResponse<Object> response = new ServiceResponse<>(true, data, "User registered successfully.");
 			return response;
 		}
-
-		// throw new UserException("Invalid key. Please try with a valid key or try registering once again.");
 		
 		ServiceResponse<Object> response = new ServiceResponse<>(false, null, "Invalid key. Please try with a valid key or try registering once again.");
 		return response;
@@ -164,12 +151,11 @@ public class UserServiceImplementation implements UserService {
 	public ServiceResponse<String> sendVerifyEmail(LoginUserRecord loginUserRecord) throws MessagingException {
 		User existingUser = userRepository.findByEmailId(loginUserRecord.emailId());
 		if (existingUser == null) {
-			// throw new UserException("Email Id is not registered. Please, sign up first!");
 			ServiceResponse<String> response = new ServiceResponse<>(false, null, "Email Id is not registered. Please, sign up first!");
 			return response;
 		}
 
-//		String token = JwtUtil.generateToken(loginUserRecord.emailId());
+		// String token = JwtUtil.generateToken(loginUserRecord.emailId());
 
 		LoginKeys newLoginKey = new LoginKeys();
 		String loginKey = UUID.randomUUID().toString();
@@ -184,9 +170,7 @@ public class UserServiceImplementation implements UserService {
 
 		loginEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
 
-		// return "email-sent. Login Key: " + loginKey;
-		// return token;
-		ServiceResponse<String> response = new ServiceResponse<>(true, "email-sent. Login Key: " + loginKey, "Email sent with login key.");
+		ServiceResponse<String> response = new ServiceResponse<>(true, "Email sent with login verification link. It will expire after 15 minutes.. Login Key: " + loginKey, "Email sent.");
 		return response;
 		
 	}
@@ -203,32 +187,23 @@ public class UserServiceImplementation implements UserService {
 	 * 
 	 */
 	@Override
-	public User userLoginFinal(String loginKey) throws UserException {
+	public ServiceResponse<Object> userLoginFinal(String loginKey) {
 		LoginKeys existingLoginKey = loginKeysRepository.findByLoginKey(loginKey);
 		if (existingLoginKey != null) {
 			long noOfMinutes = existingLoginKey.getKeyGenerationTime().until(LocalDateTime.now(), ChronoUnit.MINUTES);
 
 			if (noOfMinutes > 15) {
-				throw new UserException("Login Key expired. Please, try again!");
+				ServiceResponse<Object> response = new ServiceResponse<>(false, null, "Login Key has expired. Please, try again!");
+				return response;
 			}
 
 			User existingUser = userRepository.findById(existingLoginKey.getUserId()).get();
 
-			return existingUser;
+			ServiceResponse<Object> response = new ServiceResponse<>(true, existingUser, "User logged in successfully.");
+			return response;
 		}
-		throw new UserException("Invalid login key. Please, try again!");
-	}
-
-	/**
-	 * 
-	 * The method to use in the testing API that returns a string for confirmation
-	 * 
-	 * @return hi --> a String
-	 * 
-	 */
-	@Override
-	public String sendHello() {
-		return "hi";
+		ServiceResponse<Object> response = new ServiceResponse<>(false, null, "Invalid login key. Please try with a valid key or try logging in once again.");
+		return response;
 	}
 
 }
