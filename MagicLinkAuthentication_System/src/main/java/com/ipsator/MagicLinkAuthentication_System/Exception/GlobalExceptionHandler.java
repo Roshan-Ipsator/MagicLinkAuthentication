@@ -30,10 +30,4 @@ public class GlobalExceptionHandler {
 				e.getBindingResult().getFieldError().getDefaultMessage());
 		return new ResponseEntity<ErrorDetails>(err, HttpStatus.BAD_REQUEST);
 	}
-
-	@ExceptionHandler(UserException.class)
-	public ResponseEntity<ErrorDetails> userExceptionHandler(UserException e, WebRequest w) {
-		ErrorDetails err = new ErrorDetails(LocalDateTime.now(), e.getMessage(), w.getDescription(false));
-		return new ResponseEntity<ErrorDetails>(err, HttpStatus.BAD_REQUEST);
-	}
 }

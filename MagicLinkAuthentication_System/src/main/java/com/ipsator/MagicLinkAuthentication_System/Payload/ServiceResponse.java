@@ -11,5 +11,4 @@ public class ServiceResponse<T> {
 	private Boolean success;
 	private T data;
 	private String message;
-//	private String code;
 }

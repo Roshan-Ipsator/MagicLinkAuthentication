@@ -2,7 +2,6 @@ package com.ipsator.MagicLinkAuthentication_System.Service;
 
 import com.ipsator.MagicLinkAuthentication_System.Entity.PreFinalUserRegistration;
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
-import com.ipsator.MagicLinkAuthentication_System.Exception.UserException;
 import com.ipsator.MagicLinkAuthentication_System.Payload.ServiceResponse;
 import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Record.RegisterUserRecord;
@@ -23,7 +22,6 @@ public interface UserService {
 
 	public ServiceResponse<String> sendVerifyEmail(LoginUserRecord loginUserRecord) throws MessagingException;
 
-	public User userLoginFinal(String loginKey) throws UserException;
+	public ServiceResponse<Object> userLoginFinal(String loginKey);
 
-	public String sendHello();
 }

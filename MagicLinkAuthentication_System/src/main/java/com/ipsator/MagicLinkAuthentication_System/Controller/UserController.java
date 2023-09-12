@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ipsator.MagicLinkAuthentication_System.Entity.PreFinalUserRegistration;
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
-import com.ipsator.MagicLinkAuthentication_System.Exception.UserException;
 import com.ipsator.MagicLinkAuthentication_System.Payload.ApiResponse;
 import com.ipsator.MagicLinkAuthentication_System.Payload.Error;
 import com.ipsator.MagicLinkAuthentication_System.Payload.ServiceResponse;
@@ -71,8 +70,12 @@ public class UserController {
 	}
 	
 	@GetMapping("/finalLogin")
-	public ResponseEntity<User> userLoginFinal(@RequestParam String loginKey) {
-		return new ResponseEntity<User>(userService.userLoginFinal(loginKey), HttpStatus.OK);
+	public ResponseEntity<ApiResponse> userLoginFinal(@RequestParam String loginKey) {
+		ServiceResponse<Object> loggedInUser = userService.userLoginFinal(loginKey);
+		if(loggedInUser.getSuccess()) {
+			return new ResponseEntity<>(new ApiResponse("success",loggedInUser.getData(),null), HttpStatus.OK);
+		}
+		return new ResponseEntity<>(new ApiResponse("error",null,new Error(loggedInUser.getMessage())), HttpStatus.BAD_REQUEST);
 	}
 	
 	
