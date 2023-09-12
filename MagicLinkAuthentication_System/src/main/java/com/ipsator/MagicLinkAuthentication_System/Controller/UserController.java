@@ -17,6 +17,7 @@ import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Record.RegisterUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Record.ValidateUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Repository.UserRepository;
+import com.ipsator.MagicLinkAuthentication_System.Response.ServiceResponse;
 import com.ipsator.MagicLinkAuthentication_System.Service.UserService;
 
 import io.jsonwebtoken.Claims;
@@ -41,8 +42,8 @@ public class UserController {
 	}
 
 	@PostMapping
-	public ResponseEntity<PreFinalUserRegistration> registerUserInit(@RequestBody RegisterUserRecord registerUserRecord) throws UserException, MessagingException {
-		PreFinalUserRegistration savedTemporaryUser = userService.registerUserInit(registerUserRecord);
+	public ResponseEntity<ServiceResponse<PreFinalUserRegistration>> registerUserInit(@RequestBody RegisterUserRecord registerUserRecord) throws MessagingException {
+		ServiceResponse<PreFinalUserRegistration> savedTemporaryUser = userService.registerUserInit(registerUserRecord);
 		return new ResponseEntity<>(savedTemporaryUser, HttpStatus.CREATED);
 	}
 	
