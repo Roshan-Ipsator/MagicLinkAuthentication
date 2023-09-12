@@ -19,6 +19,7 @@ import com.ipsator.MagicLinkAuthentication_System.Record.RegisterUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Repository.LoginKeysRepository;
 import com.ipsator.MagicLinkAuthentication_System.Repository.TemporaryUsersRepository;
 import com.ipsator.MagicLinkAuthentication_System.Repository.UserRepository;
+import com.ipsator.MagicLinkAuthentication_System.Response.ServiceResponse;
 import com.ipsator.MagicLinkAuthentication_System.Service.UserService;
 //import com.ipsator.MagicLinkAuthentication_System.Utility.JwtUtil;
 
@@ -59,11 +60,13 @@ public class UserServiceImplementation implements UserService {
 	 * 
 	 */
 	@Override
-	public PreFinalUserRegistration registerUserInit(RegisterUserRecord registerUserRecord)
-			throws UserException, MessagingException {
+	public ServiceResponse<PreFinalUserRegistration> registerUserInit(RegisterUserRecord registerUserRecord)
+			throws MessagingException {
 		User existingUser = userRepository.findByEmailId(registerUserRecord.emailId());
 		if (existingUser != null) {
-			throw new UserException("Email Id already exists. Please, directly log in!");
+			// throw new UserException("Email Id already exists. Please, directly log in!");
+			ServiceResponse<PreFinalUserRegistration> response = new ServiceResponse<>("error", null, "Email Id already exists. Please, directly log in!", "400");
+			return response;
 		}
 
 		PreFinalUserRegistration newTemporaryUser = new PreFinalUserRegistration();
@@ -83,7 +86,11 @@ public class UserServiceImplementation implements UserService {
 
 		signupEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
 
-		return temporaryUsersRepository.save(newTemporaryUser);
+		// return temporaryUsersRepository.save(newTemporaryUser);
+		
+		PreFinalUserRegistration savedTemporaryUser = temporaryUsersRepository.save(newTemporaryUser);
+		ServiceResponse<PreFinalUserRegistration> response = new ServiceResponse<>("success", savedTemporaryUser, "Temporarily created the user.", "201");
+		return response;
 	}
 
 	/**
