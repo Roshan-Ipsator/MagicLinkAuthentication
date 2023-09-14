@@ -44,7 +44,7 @@ public class UserController {
 
 	@PostMapping
 	public ResponseEntity<ApiResponse> registerUserInit(@RequestBody RegisterUserRecord registerUserRecord) throws MessagingException {
-		ServiceResponse<Object> savedTemporaryUser = userService.registerUserInit(registerUserRecord);
+		ServiceResponse<PreFinalUserRegistration> savedTemporaryUser = userService.registerUserInit(registerUserRecord);
 		if(savedTemporaryUser.getSuccess()) {
 			return new ResponseEntity<>(new ApiResponse("success",savedTemporaryUser.getData(),null), HttpStatus.CREATED);
 		}
@@ -53,7 +53,7 @@ public class UserController {
 	
 	@GetMapping("/finalRegistration")
 	public ResponseEntity<ApiResponse> registerUserFinal(@RequestParam String registrationKey) {
-		ServiceResponse<Object> savedUser = userService.registerUserFinal(registrationKey);
+		ServiceResponse<User> savedUser = userService.registerUserFinal(registrationKey);
 		if(savedUser.getSuccess()) {
 			return new ResponseEntity<>(new ApiResponse("success",savedUser.getData(),null), HttpStatus.CREATED);
 		}
@@ -71,37 +71,11 @@ public class UserController {
 	
 	@GetMapping("/finalLogin")
 	public ResponseEntity<ApiResponse> userLoginFinal(@RequestParam String loginKey) {
-		ServiceResponse<Object> loggedInUser = userService.userLoginFinal(loginKey);
+		ServiceResponse<User> loggedInUser = userService.userLoginFinal(loginKey);
 		if(loggedInUser.getSuccess()) {
 			return new ResponseEntity<>(new ApiResponse("success",loggedInUser.getData(),null), HttpStatus.OK);
 		}
 		return new ResponseEntity<>(new ApiResponse("error",null,new Error(loggedInUser.getMessage())), HttpStatus.BAD_REQUEST);
-	}
-	
-	
-	
-	
-	// Currently not in use
-	@GetMapping("/validateUser")
-	public ResponseEntity<User> validateUserUsingToken(@RequestBody ValidateUserRecord validateUserRecord){
-		try {
-            // Parse the JWT token without verifying the signature
-//            @SuppressWarnings("deprecation")
-//			Claims claims = Jwts.parser()
-//                    .parseClaimsJwt(validateUserRecord.jwt())
-//                    .getBody();
-            
-            Claims claims = (Claims) Jwts.parserBuilder().setSigningKey(Keys.secretKeyFor(SignatureAlgorithm.HS256)).build().parse(validateUserRecord.jwt()).getBody();
-            
-            User user = userRepository.findByEmailId(claims.getSubject());
-            if(user!=null) {
-            	return new ResponseEntity<>(user,HttpStatus.OK);
-            }
-            return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
 	}
 	
 }
