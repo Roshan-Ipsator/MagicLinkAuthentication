@@ -1,5 +1,7 @@
 package com.ipsator.MagicLinkAuthentication_System.Service;
 
+import java.util.Map;
+
 import com.ipsator.MagicLinkAuthentication_System.Entity.PreFinalUserRegistration;
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
 import com.ipsator.MagicLinkAuthentication_System.Payload.ServiceResponse;
@@ -16,12 +18,12 @@ import jakarta.mail.MessagingException;
  *
  */
 public interface UserService {
-	public ServiceResponse<Object> registerUserInit(RegisterUserRecord registerUserRecord) throws MessagingException;
+	public ServiceResponse<PreFinalUserRegistration> registerUserInit(RegisterUserRecord registerUserRecord) throws MessagingException;
 
-	public ServiceResponse<Object> registerUserFinal(String registrationKey);
+	public ServiceResponse<User> registerUserFinal(String registrationKey);
 
 	public ServiceResponse<String> sendVerifyEmail(LoginUserRecord loginUserRecord) throws MessagingException;
 
-	public ServiceResponse<Object> userLoginFinal(String loginKey);
+	public ServiceResponse<User> userLoginFinal(String loginKey);
 
 }

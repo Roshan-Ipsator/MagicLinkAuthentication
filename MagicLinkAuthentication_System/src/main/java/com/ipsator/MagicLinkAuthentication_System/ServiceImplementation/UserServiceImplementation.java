@@ -57,11 +57,11 @@ public class UserServiceImplementation implements UserService {
 	 * 
 	 */
 	@Override
-	public ServiceResponse<Object> registerUserInit(RegisterUserRecord registerUserRecord)
+	public ServiceResponse<PreFinalUserRegistration> registerUserInit(RegisterUserRecord registerUserRecord)
 			throws MessagingException {
 		User existingUser = userRepository.findByEmailId(registerUserRecord.emailId());
 		if (existingUser != null) {
-			ServiceResponse<Object> response = new ServiceResponse<>(false, null, "Email Id already exists. Please, directly log in!");
+			ServiceResponse<PreFinalUserRegistration> response = new ServiceResponse<>(false, null, "Email Id already exists. Please, directly log in!");
 			return response;
 		}
 
@@ -83,9 +83,7 @@ public class UserServiceImplementation implements UserService {
 		signupEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
 		
 		PreFinalUserRegistration savedTemporaryUser = temporaryUsersRepository.save(newTemporaryUser);
-		Map data = new HashMap();
-		data.put("user", savedTemporaryUser);
-		ServiceResponse<Object> response = new ServiceResponse<>(true, data, "Temporarily created the user. Registration verification link has been sent to the email. It will expire after 15 minutes.");
+		ServiceResponse<PreFinalUserRegistration> response = new ServiceResponse<>(true, savedTemporaryUser, "Temporarily created the user. Registration verification link has been sent to the email. It will expire after 15 minutes.");
 		return response;
 	}
 
@@ -101,7 +99,7 @@ public class UserServiceImplementation implements UserService {
 	 * 
 	 */
 	@Override
-	public ServiceResponse<Object> registerUserFinal(String registrationKey) {
+	public ServiceResponse<User> registerUserFinal(String registrationKey) {
 		PreFinalUserRegistration existingTemporaryUser = temporaryUsersRepository
 				.findByRegistrationKey(registrationKey);
 		if (existingTemporaryUser != null) {
@@ -109,7 +107,7 @@ public class UserServiceImplementation implements UserService {
 					ChronoUnit.MINUTES);
 
 			if (noOfMinutes > 15) {
-				ServiceResponse<Object> response = new ServiceResponse<>(false, null, "Registration key has expired. Please try again!");
+				ServiceResponse<User> response = new ServiceResponse<>(false, null, "Registration key has expired. Please try again!");
 				return response;
 			}
 
@@ -126,13 +124,11 @@ public class UserServiceImplementation implements UserService {
 			temporaryUsersRepository.save(existingTemporaryUser);
 			
 			User savedUser = userRepository.save(newUser);
-			Map data = new HashMap();
-			data.put("user", savedUser);
-			ServiceResponse<Object> response = new ServiceResponse<>(true, data, "User registered successfully.");
+			ServiceResponse<User> response = new ServiceResponse<>(true, savedUser, "User registered successfully.");
 			return response;
 		}
 		
-		ServiceResponse<Object> response = new ServiceResponse<>(false, null, "Invalid key. Please try with a valid key or try registering once again.");
+		ServiceResponse<User> response = new ServiceResponse<>(false, null, "Invalid key. Please try with a valid key or try registering once again.");
 		return response;
 	}
 
@@ -170,7 +166,7 @@ public class UserServiceImplementation implements UserService {
 
 		loginEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
 
-		ServiceResponse<String> response = new ServiceResponse<>(true, "Email sent with login verification link. It will expire after 15 minutes.. Login Key: " + loginKey, "Email sent.");
+		ServiceResponse<String> response = new ServiceResponse<>(true, "Email sent with login verification link. It will expire after 15 minutes. Login Key: " + loginKey, "Email sent.");
 		return response;
 		
 	}
@@ -187,22 +183,22 @@ public class UserServiceImplementation implements UserService {
 	 * 
 	 */
 	@Override
-	public ServiceResponse<Object> userLoginFinal(String loginKey) {
+	public ServiceResponse<User> userLoginFinal(String loginKey) {
 		LoginKeys existingLoginKey = loginKeysRepository.findByLoginKey(loginKey);
 		if (existingLoginKey != null) {
 			long noOfMinutes = existingLoginKey.getKeyGenerationTime().until(LocalDateTime.now(), ChronoUnit.MINUTES);
 
 			if (noOfMinutes > 15) {
-				ServiceResponse<Object> response = new ServiceResponse<>(false, null, "Login Key has expired. Please, try again!");
+				ServiceResponse<User> response = new ServiceResponse<>(false, null, "Login Key has expired. Please, try again!");
 				return response;
 			}
 
 			User existingUser = userRepository.findById(existingLoginKey.getUserId()).get();
 
-			ServiceResponse<Object> response = new ServiceResponse<>(true, existingUser, "User logged in successfully.");
+			ServiceResponse<User> response = new ServiceResponse<>(true, existingUser, "User logged in successfully.");
 			return response;
 		}
-		ServiceResponse<Object> response = new ServiceResponse<>(false, null, "Invalid login key. Please try with a valid key or try logging in once again.");
+		ServiceResponse<User> response = new ServiceResponse<>(false, null, "Invalid login key. Please try with a valid key or try logging in once again.");
 		return response;
 	}
 
