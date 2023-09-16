@@ -17,4 +17,6 @@ public class LoginKeys {
 	private Integer userId;
 	private String loginKey;
 	private LocalDateTime keyGenerationTime;
+	private Integer consecutiveAttemptCount;
+	private LocalDateTime trackingStartTime;
 }

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +62,8 @@ public class UserServiceImplementation implements UserService {
 			throws MessagingException {
 		User existingUser = userRepository.findByEmailId(registerUserRecord.emailId());
 		if (existingUser != null) {
-			ServiceResponse<PreFinalUserRegistration> response = new ServiceResponse<>(false, null, "Email Id already exists. Please, directly log in!");
+			ServiceResponse<PreFinalUserRegistration> response = new ServiceResponse<>(false, null,
+					"Email Id already exists. Please, directly log in!");
 			return response;
 		}
 
@@ -81,9 +83,10 @@ public class UserServiceImplementation implements UserService {
 		String url = "http://localhost:8659/ipsator.com/user/finalRegistration?registrationKey=" + registrationKey;
 
 		signupEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
-		
+
 		PreFinalUserRegistration savedTemporaryUser = temporaryUsersRepository.save(newTemporaryUser);
-		ServiceResponse<PreFinalUserRegistration> response = new ServiceResponse<>(true, savedTemporaryUser, "Temporarily created the user. Registration verification link has been sent to the email. It will expire after 15 minutes.");
+		ServiceResponse<PreFinalUserRegistration> response = new ServiceResponse<>(true, savedTemporaryUser,
+				"Temporarily created the user. Registration verification link has been sent to the email. It will expire after 15 minutes.");
 		return response;
 	}
 
@@ -107,7 +110,8 @@ public class UserServiceImplementation implements UserService {
 					ChronoUnit.MINUTES);
 
 			if (noOfMinutes > 15) {
-				ServiceResponse<User> response = new ServiceResponse<>(false, null, "Registration key has expired. Please try again!");
+				ServiceResponse<User> response = new ServiceResponse<>(false, null,
+						"Registration key has expired. Please try again!");
 				return response;
 			}
 
@@ -122,13 +126,14 @@ public class UserServiceImplementation implements UserService {
 			existingTemporaryUser.setUserStatus("Verified");
 
 			temporaryUsersRepository.save(existingTemporaryUser);
-			
+
 			User savedUser = userRepository.save(newUser);
 			ServiceResponse<User> response = new ServiceResponse<>(true, savedUser, "User registered successfully.");
 			return response;
 		}
-		
-		ServiceResponse<User> response = new ServiceResponse<>(false, null, "Invalid key. Please try with a valid key or try registering once again.");
+
+		ServiceResponse<User> response = new ServiceResponse<>(false, null,
+				"Invalid key. Please try with a valid key or try registering once again.");
 		return response;
 	}
 
@@ -147,28 +152,111 @@ public class UserServiceImplementation implements UserService {
 	public ServiceResponse<String> sendVerifyEmail(LoginUserRecord loginUserRecord) throws MessagingException {
 		User existingUser = userRepository.findByEmailId(loginUserRecord.emailId());
 		if (existingUser == null) {
-			ServiceResponse<String> response = new ServiceResponse<>(false, null, "Email Id is not registered. Please, sign up first!");
+			ServiceResponse<String> response = new ServiceResponse<>(false, null,
+					"Email Id is not registered. Please, sign up first!");
 			return response;
 		}
 
-		// String token = JwtUtil.generateToken(loginUserRecord.emailId());
+		// Check if it is the first login
+		Optional<LoginKeys> loginKeyDetails = loginKeysRepository.findById(existingUser.getUserId());
+		if (loginKeyDetails.isPresent()) {
+			// not first login
+			LoginKeys existingLoginKeyDetails = loginKeyDetails.get();
 
-		LoginKeys newLoginKey = new LoginKeys();
-		String loginKey = UUID.randomUUID().toString();
-		newLoginKey.setUserId(existingUser.getUserId());
-		newLoginKey.setLoginKey(loginKey);
-		newLoginKey.setKeyGenerationTime(LocalDateTime.now());
-		loginKeysRepository.save(newLoginKey);
+			// check if user is temporarily locked or not
+			// if user is not locked temporarily
+			if (existingLoginKeyDetails.getTrackingStartTime().isBefore(LocalDateTime.now())) {
+				long currentIntervalInSeconds = ChronoUnit.SECONDS
+						.between(existingLoginKeyDetails.getTrackingStartTime(), LocalDateTime.now());
 
-		String to = loginUserRecord.emailId();
-		String subject = "Check out this URL to verify";
-		String url = "http://localhost:8659/ipsator.com/user/finalLogin?loginKey=" + loginKey;
+				// if interval is more than 30 minutes --> reset trackingStartTime and no of
+				// login attempts
+				if (currentIntervalInSeconds > (30 * 60)) {
+					existingLoginKeyDetails.setTrackingStartTime(LocalDateTime.now());
+					existingLoginKeyDetails.setConsecutiveAttemptCount(1);
+					String loginKey = UUID.randomUUID().toString();
+					existingLoginKeyDetails.setLoginKey(loginKey);
+					existingLoginKeyDetails.setKeyGenerationTime(LocalDateTime.now());
+					loginKeysRepository.save(existingLoginKeyDetails);
 
-		loginEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
+					String to = loginUserRecord.emailId();
+					String subject = "Check out this URL to verify";
+					String url = "http://localhost:8659/ipsator.com/user/finalLogin?loginKey=" + loginKey;
 
-		ServiceResponse<String> response = new ServiceResponse<>(true, "Email sent with login verification link. It will expire after 15 minutes. Login Key: " + loginKey, "Email sent.");
-		return response;
-		
+					loginEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
+
+					ServiceResponse<String> response = new ServiceResponse<>(true,
+							"Email sent with login verification link. It will expire after 15 minutes. Login Key: "
+									+ loginKey,
+							"Email sent.");
+					return response;
+				} else {
+					// check the no of login attempts left
+					int noOfLoginAttemptsMade = existingLoginKeyDetails.getConsecutiveAttemptCount();
+					if (noOfLoginAttemptsMade >= 5) {
+						// lock the user temporarily for next 2 hours
+						LocalDateTime lockOutEndTime = LocalDateTime.now().plusHours(2);
+						existingLoginKeyDetails.setTrackingStartTime(lockOutEndTime);
+						existingLoginKeyDetails.setConsecutiveAttemptCount(0);
+						loginKeysRepository.save(existingLoginKeyDetails);
+
+						ServiceResponse<String> response = new ServiceResponse<>(false, null,
+								"User is temporarily locked due to maximum login attempt exceeded. Please, try logging in after "
+										+ lockOutEndTime);
+						return response;
+					} else {
+						// increase the count
+						existingLoginKeyDetails
+								.setConsecutiveAttemptCount(existingLoginKeyDetails.getConsecutiveAttemptCount() + 1);
+						existingLoginKeyDetails.setKeyGenerationTime(LocalDateTime.now());
+						String loginKey = UUID.randomUUID().toString();
+						existingLoginKeyDetails.setLoginKey(loginKey);
+
+						loginKeysRepository.save(existingLoginKeyDetails);
+
+						String to = loginUserRecord.emailId();
+						String subject = "Check out this URL to verify";
+						String url = "http://localhost:8659/ipsator.com/user/finalLogin?loginKey=" + loginKey;
+
+						loginEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
+
+						ServiceResponse<String> response = new ServiceResponse<>(true,
+								"Email sent with login verification link. It will expire after 15 minutes. Login Key: "
+										+ loginKey,
+								"Email sent.");
+						return response;
+
+					}
+				}
+			} else {
+				// user is still temporarily locked
+				ServiceResponse<String> response = new ServiceResponse<>(false, null,
+						"User is temporarily locked due to maximum login attempt exceeded. Please, try logging in after "
+								+ existingLoginKeyDetails.getTrackingStartTime());
+				return response;
+			}
+		} else {
+			// first login
+			LoginKeys newLoginKey = new LoginKeys();
+			String loginKey = UUID.randomUUID().toString();
+			newLoginKey.setUserId(existingUser.getUserId());
+			newLoginKey.setLoginKey(loginKey);
+			newLoginKey.setKeyGenerationTime(LocalDateTime.now());
+			newLoginKey.setTrackingStartTime(LocalDateTime.now());
+			newLoginKey.setConsecutiveAttemptCount(1);
+			loginKeysRepository.save(newLoginKey);
+
+			String to = loginUserRecord.emailId();
+			String subject = "Check out this URL to verify";
+			String url = "http://localhost:8659/ipsator.com/user/finalLogin?loginKey=" + loginKey;
+
+			loginEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
+
+			ServiceResponse<String> response = new ServiceResponse<>(true,
+					"Email sent with login verification link. It will expire after 15 minutes. Login Key: " + loginKey,
+					"Email sent.");
+			return response;
+		}
 	}
 
 	/**
@@ -189,7 +277,8 @@ public class UserServiceImplementation implements UserService {
 			long noOfMinutes = existingLoginKey.getKeyGenerationTime().until(LocalDateTime.now(), ChronoUnit.MINUTES);
 
 			if (noOfMinutes > 15) {
-				ServiceResponse<User> response = new ServiceResponse<>(false, null, "Login Key has expired. Please, try again!");
+				ServiceResponse<User> response = new ServiceResponse<>(false, null,
+						"Login Key has expired. Please, try again!");
 				return response;
 			}
 
@@ -198,7 +287,8 @@ public class UserServiceImplementation implements UserService {
 			ServiceResponse<User> response = new ServiceResponse<>(true, existingUser, "User logged in successfully.");
 			return response;
 		}
-		ServiceResponse<User> response = new ServiceResponse<>(false, null, "Invalid login key. Please try with a valid key or try logging in once again.");
+		ServiceResponse<User> response = new ServiceResponse<>(false, null,
+				"Invalid login key. Please try with a valid key or try logging in once again.");
 		return response;
 	}
 
