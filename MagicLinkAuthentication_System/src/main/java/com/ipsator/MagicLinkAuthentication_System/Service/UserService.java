@@ -24,6 +24,6 @@ public interface UserService {
 
 	public ServiceResponse<String> sendVerifyEmail(LoginUserRecord loginUserRecord) throws MessagingException;
 
-	public ServiceResponse<User> userLoginFinal(String loginKey);
+	public ServiceResponse<String> userLoginFinal(String loginKey);
 
 }
