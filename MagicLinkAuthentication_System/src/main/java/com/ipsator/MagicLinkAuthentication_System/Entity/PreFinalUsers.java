@@ -10,11 +10,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * An Entity to contain all the details of users before final registration
+ * @author Roshan
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class PreFinalUserRegistration {
+public class PreFinalUsers {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer userId;

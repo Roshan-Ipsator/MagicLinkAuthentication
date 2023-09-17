@@ -9,6 +9,11 @@ import org.springframework.stereotype.Service;
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
 import com.ipsator.MagicLinkAuthentication_System.Repository.UserRepository;
 
+/**
+ * 
+ * @author Roshan
+ *
+ */
 @Service
 public class CustomUserDetailService implements UserDetailsService {
 
@@ -17,7 +22,6 @@ public class CustomUserDetailService implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		User user = userRepository.findByEmailId(username).orElseThrow(() -> new UsernameNotFoundException("User not found!!"));
-		// load user from database
 		return user;
 	}
 

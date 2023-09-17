@@ -12,13 +12,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.ipsator.MagicLinkAuthentication_System.Entity.LoginKeys;
-import com.ipsator.MagicLinkAuthentication_System.Entity.PreFinalUserRegistration;
+import com.ipsator.MagicLinkAuthentication_System.Entity.PreFinalUsers;
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
 import com.ipsator.MagicLinkAuthentication_System.Payload.ServiceResponse;
 import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Record.RegisterUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Repository.LoginKeysRepository;
-import com.ipsator.MagicLinkAuthentication_System.Repository.TemporaryUsersRepository;
+import com.ipsator.MagicLinkAuthentication_System.Repository.PreFinalUsersRepository;
 import com.ipsator.MagicLinkAuthentication_System.Repository.UserRepository;
 import com.ipsator.MagicLinkAuthentication_System.Security.JwtHelper;
 import com.ipsator.MagicLinkAuthentication_System.Service.UserService;
@@ -44,7 +44,7 @@ public class UserServiceImplementation implements UserService {
 	private UserRepository userRepository;
 
 	@Autowired
-	private TemporaryUsersRepository temporaryUsersRepository;
+	private PreFinalUsersRepository temporaryUsersRepository;
 
 	@Autowired
 	private LoginKeysRepository loginKeysRepository;
@@ -54,16 +54,16 @@ public class UserServiceImplementation implements UserService {
 
 	@Autowired
 	private SignupEmailServiceImplementation signupEmailServiceImplementation;
-	
+
 	@Autowired
 	private AuthenticationManager manager;
-	
+
 	@Autowired
 	private UserDetailsService userDetailsService;
-	
+
 	@Autowired
 	private JwtHelper helper;
-	
+
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
@@ -79,16 +79,16 @@ public class UserServiceImplementation implements UserService {
 	 * 
 	 */
 	@Override
-	public ServiceResponse<PreFinalUserRegistration> registerUserInit(RegisterUserRecord registerUserRecord)
+	public ServiceResponse<PreFinalUsers> preFinalUserRegistration(RegisterUserRecord registerUserRecord)
 			throws MessagingException {
 		Optional<User> existingUserOpt = userRepository.findByEmailId(registerUserRecord.emailId());
 		if (existingUserOpt.isPresent()) {
-			ServiceResponse<PreFinalUserRegistration> response = new ServiceResponse<>(false, null,
+			ServiceResponse<PreFinalUsers> response = new ServiceResponse<>(false, null,
 					"Email Id already exists. Please, directly log in!");
 			return response;
 		}
 
-		PreFinalUserRegistration newTemporaryUser = new PreFinalUserRegistration();
+		PreFinalUsers newTemporaryUser = new PreFinalUsers();
 		newTemporaryUser.setFirstName(registerUserRecord.firstName());
 		newTemporaryUser.setLastName(registerUserRecord.lastName());
 		newTemporaryUser.setEmailId(registerUserRecord.emailId());
@@ -105,8 +105,8 @@ public class UserServiceImplementation implements UserService {
 
 		signupEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
 
-		PreFinalUserRegistration savedTemporaryUser = temporaryUsersRepository.save(newTemporaryUser);
-		ServiceResponse<PreFinalUserRegistration> response = new ServiceResponse<>(true, savedTemporaryUser,
+		PreFinalUsers savedTemporaryUser = temporaryUsersRepository.save(newTemporaryUser);
+		ServiceResponse<PreFinalUsers> response = new ServiceResponse<>(true, savedTemporaryUser,
 				"Temporarily created the user. Registration verification link has been sent to the email. It will expire after 15 minutes.");
 		return response;
 	}
@@ -123,12 +123,11 @@ public class UserServiceImplementation implements UserService {
 	 * 
 	 */
 	@Override
-	public ServiceResponse<User> registerUserFinal(String registrationKey) {
-		PreFinalUserRegistration existingTemporaryUser = temporaryUsersRepository
-				.findByRegistrationKey(registrationKey);
+	public ServiceResponse<User> finalUserRegistration(String registrationKey) {
+		PreFinalUsers existingTemporaryUser = temporaryUsersRepository.findByRegistrationKey(registrationKey);
 		if (existingTemporaryUser != null) {
 			Optional<User> existingUserOpt = userRepository.findByEmailId(existingTemporaryUser.getEmailId());
-			if(existingUserOpt.isPresent()) {
+			if (existingUserOpt.isPresent()) {
 				ServiceResponse<User> response = new ServiceResponse<>(false, null,
 						"Email Id already exists. Please, directly log in!");
 				return response;
@@ -177,7 +176,7 @@ public class UserServiceImplementation implements UserService {
 	 * 
 	 */
 	@Override
-	public ServiceResponse<String> sendVerifyEmail(LoginUserRecord loginUserRecord) throws MessagingException {
+	public ServiceResponse<String> preFinalUserLogin(LoginUserRecord loginUserRecord) throws MessagingException {
 		Optional<User> existingUserOpt = userRepository.findByEmailId(loginUserRecord.emailId());
 		if (existingUserOpt.isEmpty()) {
 			ServiceResponse<String> response = new ServiceResponse<>(false, null,
@@ -300,7 +299,7 @@ public class UserServiceImplementation implements UserService {
 	 * 
 	 */
 	@Override
-	public ServiceResponse<String> userLoginFinal(String loginKey) {
+	public ServiceResponse<String> finalUserLogin(String loginKey) {
 		LoginKeys existingLoginKey = loginKeysRepository.findByLoginKey(loginKey);
 		if (existingLoginKey != null) {
 			long noOfMinutes = existingLoginKey.getKeyGenerationTime().until(LocalDateTime.now(), ChronoUnit.MINUTES);
@@ -312,12 +311,13 @@ public class UserServiceImplementation implements UserService {
 			}
 
 			User existingUser = userRepository.findById(existingLoginKey.getUserId()).get();
-			System.out.println(existingUser.getEmailId()+" "+existingUser.getPassword());
-			boolean passwordMatches = passwordEncoder.matches("b38c6b23-5195-4544-bed3-a2ccc7bf4ae2", existingUser.getPassword());
+			System.out.println(existingUser.getEmailId() + " " + existingUser.getPassword());
+			boolean passwordMatches = passwordEncoder.matches("b38c6b23-5195-4544-bed3-a2ccc7bf4ae2",
+					existingUser.getPassword());
 			System.out.println(passwordMatches);
-			PreFinalUserRegistration temporaryUser = temporaryUsersRepository.findById(existingUser.getUserId()).get();
+			PreFinalUsers temporaryUser = temporaryUsersRepository.findById(existingUser.getUserId()).get();
 			this.doAuthenticate(existingUser.getEmailId(), temporaryUser.getRegistrationKey());
-			System.out.println(existingUser.getEmailId()+" "+existingUser.getPassword());
+			System.out.println(existingUser.getEmailId() + " " + existingUser.getPassword());
 			UserDetails userDetails = userDetailsService.loadUserByUsername(existingUser.getEmailId());
 			String token = this.helper.generateToken(userDetails);
 
@@ -328,26 +328,23 @@ public class UserServiceImplementation implements UserService {
 				"Invalid login key. Please try with a valid key or try logging in once again.");
 		return response;
 	}
-	
+
+	/**
+	 * 
+	 * @param email
+	 * @param password
+	 */
 	private void doAuthenticate(String email, String password) {
 
 		UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(email, password);
-//		System.out.println("inside doAuth method before try block.");
 		try {
-			
+
 			manager.authenticate(authentication);
-//			System.out.println("inside try block.");
 
 		} catch (BadCredentialsException e) {
-//			System.out.println("inside catch block.");
 			throw new BadCredentialsException(" Invalid Username or Password  !!");
 		}
 
-	}
-
-	@ExceptionHandler(BadCredentialsException.class)
-	public String exceptionHandler() {
-		return "Credentials Invalid !!";
 	}
 
 }

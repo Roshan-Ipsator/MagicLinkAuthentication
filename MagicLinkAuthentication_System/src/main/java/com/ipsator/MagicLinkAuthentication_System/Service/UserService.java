@@ -2,7 +2,7 @@ package com.ipsator.MagicLinkAuthentication_System.Service;
 
 import java.util.Map;
 
-import com.ipsator.MagicLinkAuthentication_System.Entity.PreFinalUserRegistration;
+import com.ipsator.MagicLinkAuthentication_System.Entity.PreFinalUsers;
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
 import com.ipsator.MagicLinkAuthentication_System.Payload.ServiceResponse;
 import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
@@ -18,12 +18,56 @@ import jakarta.mail.MessagingException;
  *
  */
 public interface UserService {
-	public ServiceResponse<PreFinalUserRegistration> registerUserInit(RegisterUserRecord registerUserRecord) throws MessagingException;
+	/**
+	 * 
+	 * The method to temporarily register a user before final verification
+	 * 
+	 * @param registerUserRecord object of RegisterUserRecord class
+	 * 
+	 * @return temporaryUser object
+	 * 
+	 * @throws UserException, MessagingException
+	 * 
+	 */
+	public ServiceResponse<PreFinalUsers> preFinalUserRegistration(RegisterUserRecord registerUserRecord) throws MessagingException;
 
-	public ServiceResponse<User> registerUserFinal(String registrationKey);
+	/**
+	 * 
+	 * The method to finally register a user after final verification
+	 * 
+	 * @param registrationKey a string to verify the user for complete registration
+	 * 
+	 * @return User object
+	 * 
+	 * @throws UserException
+	 * 
+	 */
+	public ServiceResponse<User> finalUserRegistration(String registrationKey);
 
-	public ServiceResponse<String> sendVerifyEmail(LoginUserRecord loginUserRecord) throws MessagingException;
+	/**
+	 * 
+	 * The method to send a verification email for the final login
+	 * 
+	 * @param loginUserRecord object of LoginUserRecord contains the user's email id
+	 * 
+	 * @return loginKey a string to verify the user for final login
+	 * 
+	 * @throws UserException, MessagingException
+	 * 
+	 */
+	public ServiceResponse<String> preFinalUserLogin(LoginUserRecord loginUserRecord) throws MessagingException;
 
-	public ServiceResponse<String> userLoginFinal(String loginKey);
+	/**
+	 * 
+	 * The method for the final login after final login verification
+	 * 
+	 * @param loginKey a string to verify the user for final login
+	 * 
+	 * @return User object
+	 * 
+	 * @throws UserException
+	 * 
+	 */
+	public ServiceResponse<String> finalUserLogin(String loginKey);
 
 }
