@@ -7,6 +7,10 @@ import org.springframework.stereotype.Repository;
 
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
 
+/**
+ * A repository for Users
+ * @author Roshan
+ */
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
 	Optional<User> findByEmailId(String emailId);

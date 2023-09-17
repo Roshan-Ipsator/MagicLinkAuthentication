@@ -14,6 +14,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.ipsator.MagicLinkAuthentication_System.Security.JwtAuthenticationEntryPoint;
 import com.ipsator.MagicLinkAuthentication_System.Security.JwtAuthenticationFilter;
 
+/**
+ * A configuration class that contains beans of SecurityFilterChain and DaoAuthenticationProvider
+ * 
+ * @author Roshan
+ *
+ */
 @Configuration
 public class SecurityConfig {
 	@Autowired
@@ -25,6 +31,15 @@ public class SecurityConfig {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
+	/**
+	 * A bean declaration of SecurityFilterChain
+	 * 
+	 * @param http object of HttpSecurity
+	 * 
+	 * @return SecurityFilterChain object
+	 * 
+	 * @throws Exception
+	 */
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -39,6 +54,13 @@ public class SecurityConfig {
 		return http.build();
 	}
 
+	/**
+	 * A bean declaration of DaoAuthenticationProvider
+	 * 
+	 * @param
+	 * 
+	 * @return DaoAuthenticationProvider object
+	 */
 	@Bean
 	public DaoAuthenticationProvider daoAuthenticationProvider() {
 		DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();

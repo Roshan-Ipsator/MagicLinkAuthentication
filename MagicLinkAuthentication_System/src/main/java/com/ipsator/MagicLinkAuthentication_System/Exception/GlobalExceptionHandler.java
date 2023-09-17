@@ -4,12 +4,18 @@ import java.time.LocalDateTime;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
+/**
+ * The global exception handler class
+ * 
+ * @author Roshan
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 	@ExceptionHandler(Exception.class)
@@ -29,5 +35,10 @@ public class GlobalExceptionHandler {
 		ErrorDetails err = new ErrorDetails(LocalDateTime.now(), "Validation Error..!",
 				e.getBindingResult().getFieldError().getDefaultMessage());
 		return new ResponseEntity<ErrorDetails>(err, HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(BadCredentialsException.class)
+	public String exceptionHandler() {
+		return "Credentials Invalid !!";
 	}
 }

@@ -12,14 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ipsator.MagicLinkAuthentication_System.Entity.PreFinalUserRegistration;
+import com.ipsator.MagicLinkAuthentication_System.Entity.PreFinalUsers;
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
 import com.ipsator.MagicLinkAuthentication_System.Payload.ApiResponse;
 import com.ipsator.MagicLinkAuthentication_System.Payload.Error;
 import com.ipsator.MagicLinkAuthentication_System.Payload.ServiceResponse;
 import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Record.RegisterUserRecord;
-import com.ipsator.MagicLinkAuthentication_System.Record.ValidateUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Repository.UserRepository;
 import com.ipsator.MagicLinkAuthentication_System.Service.UserService;
 
@@ -29,60 +28,96 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.mail.MessagingException;
 
+/**
+ * A controller class that contains API end points for Pre-final User
+ * Registration, Final User Registration, Pre-final User Login, Final User
+ * Login, Get All Users
+ * 
+ * @author Roshan
+ *
+ */
 @RestController
 @RequestMapping("/ipsator.com/user")
 public class UserController {
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private UserRepository userRepository;
-	
-	// Testing Purpose
-	@GetMapping
-	public String hello() {
-		return "Welcome to my application! :)";
+
+	/**
+	 * API end point for Pre-final User Registration
+	 * @param registerUserRecord object of RegisterUserRecord
+	 * @return ResponseEntity object
+	 * @throws MessagingException
+	 */
+	@PostMapping
+	public ResponseEntity<ApiResponse> preFinalUserRegistration(@RequestBody RegisterUserRecord registerUserRecord)
+			throws MessagingException {
+		ServiceResponse<PreFinalUsers> savedTemporaryUser = userService.preFinalUserRegistration(registerUserRecord);
+		if (savedTemporaryUser.getSuccess()) {
+			return new ResponseEntity<>(new ApiResponse("success", savedTemporaryUser.getData(), null),
+					HttpStatus.CREATED);
+		}
+		return new ResponseEntity<>(new ApiResponse("error", null, new Error(savedTemporaryUser.getMessage())),
+				HttpStatus.BAD_REQUEST);
 	}
 
-	@PostMapping
-	public ResponseEntity<ApiResponse> registerUserInit(@RequestBody RegisterUserRecord registerUserRecord) throws MessagingException {
-		ServiceResponse<PreFinalUserRegistration> savedTemporaryUser = userService.registerUserInit(registerUserRecord);
-		if(savedTemporaryUser.getSuccess()) {
-			return new ResponseEntity<>(new ApiResponse("success",savedTemporaryUser.getData(),null), HttpStatus.CREATED);
+	/**
+	 * API end point for Final User Registration
+	 * @param registrationKey a String
+	 * @return ResponseEntity object
+	 */
+	@GetMapping("/final-registration")
+	public ResponseEntity<ApiResponse> finalUserRegistration(@RequestParam String registrationKey) {
+		ServiceResponse<User> savedUser = userService.finalUserRegistration(registrationKey);
+		if (savedUser.getSuccess()) {
+			return new ResponseEntity<>(new ApiResponse("success", savedUser.getData(), null), HttpStatus.CREATED);
 		}
-		return new ResponseEntity<>(new ApiResponse("error",null,new Error(savedTemporaryUser.getMessage())), HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(new ApiResponse("error", null, new Error(savedUser.getMessage())),
+				HttpStatus.BAD_REQUEST);
 	}
-	
-	@GetMapping("/finalRegistration")
-	public ResponseEntity<ApiResponse> registerUserFinal(@RequestParam String registrationKey) {
-		ServiceResponse<User> savedUser = userService.registerUserFinal(registrationKey);
-		if(savedUser.getSuccess()) {
-			return new ResponseEntity<>(new ApiResponse("success",savedUser.getData(),null), HttpStatus.CREATED);
-		}
-		return new ResponseEntity<>(new ApiResponse("error",null,new Error(savedUser.getMessage())), HttpStatus.BAD_REQUEST);
-	}
-	
+
+	/**
+	 * API end point for Pre-final User Login
+	 * @param loginUserRecord object of LoginUserRecord
+	 * @return ResponseEntity object
+	 * @throws MessagingException
+	 */
 	@PostMapping("/send-verify-email")
-	public ResponseEntity<ApiResponse> sendVerifyEmail(@RequestBody LoginUserRecord loginUserRecord) throws MessagingException{
-		ServiceResponse<String> loginKeyConfirmation = userService.sendVerifyEmail(loginUserRecord);
-		if(loginKeyConfirmation.getSuccess()) {
-			return new ResponseEntity<>(new ApiResponse("success",loginKeyConfirmation.getData(),null), HttpStatus.OK);
+	public ResponseEntity<ApiResponse> preFinalUserLogin(@RequestBody LoginUserRecord loginUserRecord)
+			throws MessagingException {
+		ServiceResponse<String> loginKeyConfirmation = userService.preFinalUserLogin(loginUserRecord);
+		if (loginKeyConfirmation.getSuccess()) {
+			return new ResponseEntity<>(new ApiResponse("success", loginKeyConfirmation.getData(), null),
+					HttpStatus.OK);
 		}
-		return new ResponseEntity<>(new ApiResponse("error",null,new Error(loginKeyConfirmation.getMessage())), HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(new ApiResponse("error", null, new Error(loginKeyConfirmation.getMessage())),
+				HttpStatus.BAD_REQUEST);
 	}
-	
-	@GetMapping("/finalLogin")
+
+	/**
+	 * API end point for Final User Login
+	 * @param loginKey a String
+	 * @return ResponseEntity object
+	 */
+	@GetMapping("/final-login")
 	public ResponseEntity<ApiResponse> userLoginFinal(@RequestParam String loginKey) {
-		ServiceResponse<String> loggedInUser = userService.userLoginFinal(loginKey);
-		if(loggedInUser.getSuccess()) {
-			return new ResponseEntity<>(new ApiResponse("success",loggedInUser.getData(),null), HttpStatus.OK);
+		ServiceResponse<String> loggedInUser = userService.finalUserLogin(loginKey);
+		if (loggedInUser.getSuccess()) {
+			return new ResponseEntity<>(new ApiResponse("success", loggedInUser.getData(), null), HttpStatus.OK);
 		}
-		return new ResponseEntity<>(new ApiResponse("error",null,new Error(loggedInUser.getMessage())), HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(new ApiResponse("error", null, new Error(loggedInUser.getMessage())),
+				HttpStatus.BAD_REQUEST);
 	}
-	
-	@GetMapping("/users")
-	public List<User> getAllUsers(){
+
+	/**
+	 * API end point for Getting All Users
+	 * @return List of users
+	 */
+	@GetMapping("/get-all-users")
+	public List<User> getAllUsers() {
 		return userRepository.findAll();
 	}
-	
+
 }
