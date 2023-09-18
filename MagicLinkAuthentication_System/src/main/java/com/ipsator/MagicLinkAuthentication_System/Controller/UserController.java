@@ -23,6 +23,7 @@ import com.ipsator.MagicLinkAuthentication_System.Repository.UserRepository;
 import com.ipsator.MagicLinkAuthentication_System.Service.UserService;
 
 import jakarta.mail.MessagingException;
+import jakarta.validation.Valid;
 
 /**
  * A controller class that contains API end points for Pre-final User
@@ -49,7 +50,7 @@ public class UserController {
 	 * @throws MessagingException
 	 */
 	@PostMapping("/pre-final-registration")
-	public ResponseEntity<ApiResponse> preFinalUserRegistration(@RequestBody RegisterUserRecord registerUserRecord)
+	public ResponseEntity<ApiResponse> preFinalUserRegistration(@Valid @RequestBody RegisterUserRecord registerUserRecord)
 			throws MessagingException {
 		ServiceResponse<PreFinalUsers> savedTemporaryUser = userService.preFinalUserRegistration(registerUserRecord);
 		if (savedTemporaryUser.getSuccess()) {
