@@ -9,6 +9,7 @@ import com.ipsator.MagicLinkAuthentication_System.Entity.User;
 
 /**
  * A repository for Users
+ * 
  * @author Roshan
  */
 @Repository

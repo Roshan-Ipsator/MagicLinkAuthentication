@@ -9,7 +9,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * An Entity to contain login keys with relevant details for different users 
+ * An Entity to contain login keys with relevant details for different users
+ * 
  * @author Roshan
  */
 @Data

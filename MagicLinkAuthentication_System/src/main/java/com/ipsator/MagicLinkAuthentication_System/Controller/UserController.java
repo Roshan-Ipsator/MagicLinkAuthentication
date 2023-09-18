@@ -22,10 +22,6 @@ import com.ipsator.MagicLinkAuthentication_System.Record.RegisterUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Repository.UserRepository;
 import com.ipsator.MagicLinkAuthentication_System.Service.UserService;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import jakarta.mail.MessagingException;
 
 /**
@@ -47,11 +43,12 @@ public class UserController {
 
 	/**
 	 * API end point for Pre-final User Registration
+	 * 
 	 * @param registerUserRecord object of RegisterUserRecord
 	 * @return ResponseEntity object
 	 * @throws MessagingException
 	 */
-	@PostMapping
+	@PostMapping("/pre-final-registration")
 	public ResponseEntity<ApiResponse> preFinalUserRegistration(@RequestBody RegisterUserRecord registerUserRecord)
 			throws MessagingException {
 		ServiceResponse<PreFinalUsers> savedTemporaryUser = userService.preFinalUserRegistration(registerUserRecord);
@@ -65,6 +62,7 @@ public class UserController {
 
 	/**
 	 * API end point for Final User Registration
+	 * 
 	 * @param registrationKey a String
 	 * @return ResponseEntity object
 	 */
@@ -80,11 +78,12 @@ public class UserController {
 
 	/**
 	 * API end point for Pre-final User Login
+	 * 
 	 * @param loginUserRecord object of LoginUserRecord
 	 * @return ResponseEntity object
 	 * @throws MessagingException
 	 */
-	@PostMapping("/send-verify-email")
+	@PostMapping("/pre-final-login")
 	public ResponseEntity<ApiResponse> preFinalUserLogin(@RequestBody LoginUserRecord loginUserRecord)
 			throws MessagingException {
 		ServiceResponse<String> loginKeyConfirmation = userService.preFinalUserLogin(loginUserRecord);
@@ -98,6 +97,7 @@ public class UserController {
 
 	/**
 	 * API end point for Final User Login
+	 * 
 	 * @param loginKey a String
 	 * @return ResponseEntity object
 	 */
@@ -113,6 +113,7 @@ public class UserController {
 
 	/**
 	 * API end point for Getting All Users
+	 * 
 	 * @return List of users
 	 */
 	@GetMapping("/get-all-users")

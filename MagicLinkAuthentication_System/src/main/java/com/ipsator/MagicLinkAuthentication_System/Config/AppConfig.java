@@ -8,7 +8,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
- * A configuration class that contains beans of PassowrdEncoder and AuthenticationManager
+ * A configuration class that contains beans of PassowrdEncoder and
+ * AuthenticationManager
  * 
  * @author Roshan
  *
