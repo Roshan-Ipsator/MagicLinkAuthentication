@@ -178,7 +178,13 @@ public class UserServiceImplementation implements UserService {
 		// else if it is within that 30 minutes
 		List<PreFinalUsers> preFinalUsers = preFinalUsersRepository
 				.findByEmailId(tempRegdAttemptTracker.getUserEmailId());
-		long listSize = preFinalUsers.size();
+		long listSize = 0;
+		
+		for(PreFinalUsers preFinalUser:preFinalUsers) {
+			if(preFinalUser.getKeyGenerationTime().isAfter(tempRegdAttemptTracker.getTrackingStartTime()) && preFinalUser.getKeyGenerationTime().isBefore(LocalDateTime.now())) {
+				listSize++;
+			}
+		}
 
 		// if with in that 30 minutes, the attempt count is more than or equal to 5
 		// Temporarily lock the user for next 2 hours
