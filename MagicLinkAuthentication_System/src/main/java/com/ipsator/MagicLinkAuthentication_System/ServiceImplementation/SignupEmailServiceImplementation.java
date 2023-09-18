@@ -11,7 +11,8 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
 /**
- * A class that contains the method to send the verify email to the user's account
+ * A class that contains the method to send the verify email to the user's
+ * account
  * 
  * @author Roshan
  *
@@ -23,13 +24,13 @@ public class SignupEmailServiceImplementation {
 
 	@Autowired
 	private TemplateEngine templateEngine;
-	
+
 	/**
 	 * The method to send verify url to the user's email
 	 * 
-	 * @param to the destination email id
+	 * @param to      the destination email id
 	 * @param subject subject line for the email
-	 * @param url the url containing the login confirmation API
+	 * @param url     the url containing the login confirmation API
 	 * 
 	 * @return void
 	 * 
@@ -39,18 +40,18 @@ public class SignupEmailServiceImplementation {
 		MimeMessage message = emailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-		// Create a Thymeleaf context and set variables
+		// Creating a Thymeleaf context and set variables
 		Context context = new Context();
 		context.setVariable("url", url);
 
-		// Process the HTML email template
+		// Processing the HTML email template
 		String htmlContent = templateEngine.process("signup-email-template", context);
 
 		helper.setTo(to);
 		helper.setSubject(subject);
 		helper.setText(htmlContent, true);
 
-		// Send the email
+		// Sending the email
 		emailSender.send(message);
 	}
 }

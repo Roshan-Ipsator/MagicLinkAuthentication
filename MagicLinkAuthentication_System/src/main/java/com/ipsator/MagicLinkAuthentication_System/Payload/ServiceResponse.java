@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * A class to use as a payload for ServiceResponses
+ * 
  * @author Roshan
  */
 @Data

@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * An Entity to contain all the details of users before final registration
+ * 
  * @author Roshan
  */
 @Data

@@ -1,7 +1,5 @@
 package com.ipsator.MagicLinkAuthentication_System.Service;
 
-import java.util.Map;
-
 import com.ipsator.MagicLinkAuthentication_System.Entity.PreFinalUsers;
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
 import com.ipsator.MagicLinkAuthentication_System.Payload.ServiceResponse;
@@ -29,7 +27,8 @@ public interface UserService {
 	 * @throws UserException, MessagingException
 	 * 
 	 */
-	public ServiceResponse<PreFinalUsers> preFinalUserRegistration(RegisterUserRecord registerUserRecord) throws MessagingException;
+	public ServiceResponse<PreFinalUsers> preFinalUserRegistration(RegisterUserRecord registerUserRecord)
+			throws MessagingException;
 
 	/**
 	 * 

@@ -15,7 +15,8 @@ import com.ipsator.MagicLinkAuthentication_System.Security.JwtAuthenticationEntr
 import com.ipsator.MagicLinkAuthentication_System.Security.JwtAuthenticationFilter;
 
 /**
- * A configuration class that contains beans of SecurityFilterChain and DaoAuthenticationProvider
+ * A configuration class that contains beans of SecurityFilterChain and
+ * DaoAuthenticationProvider
  * 
  * @author Roshan
  *
@@ -43,10 +44,10 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-		http.csrf(csrf -> csrf.disable()).cors(cors -> cors.disable())
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/home/**").authenticated()
-						.requestMatchers("/ipsator.com/user", "/ipsator.com/user/finalRegistration","/ipsator.com/user/send-verify-email","/ipsator.com/user/finalLogin").permitAll().anyRequest().authenticated())
-				.exceptionHandling(ex -> ex.authenticationEntryPoint(point))
+		http.csrf(csrf -> csrf.disable()).cors(cors -> cors.disable()).authorizeHttpRequests(auth -> auth
+				.requestMatchers("/ipsator.com/user/pre-final-registration", "/ipsator.com/user/final-registration",
+						"/ipsator.com/user/pre-final-login", "/ipsator.com/user/final-login")
+				.permitAll().anyRequest().authenticated()).exceptionHandling(ex -> ex.authenticationEntryPoint(point))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
 		http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);

@@ -2,14 +2,11 @@ package com.ipsator.MagicLinkAuthentication_System.ServiceImplementation;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.ipsator.MagicLinkAuthentication_System.Entity.LoginKeys;
 import com.ipsator.MagicLinkAuthentication_System.Entity.PreFinalUsers;
@@ -101,7 +98,7 @@ public class UserServiceImplementation implements UserService {
 
 		String to = registerUserRecord.emailId();
 		String subject = "Check out this URL to complete your registration.";
-		String url = "http://localhost:8659/ipsator.com/user/finalRegistration?registrationKey=" + registrationKey;
+		String url = "http://localhost:8659/ipsator.com/user/final-registration?registrationKey=" + registrationKey;
 
 		signupEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
 
@@ -209,7 +206,7 @@ public class UserServiceImplementation implements UserService {
 
 					String to = loginUserRecord.emailId();
 					String subject = "Check out this URL to verify";
-					String url = "http://localhost:8659/ipsator.com/user/finalLogin?loginKey=" + loginKey;
+					String url = "http://localhost:8659/ipsator.com/user/final-login?loginKey=" + loginKey;
 
 					loginEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
 
@@ -244,7 +241,7 @@ public class UserServiceImplementation implements UserService {
 
 						String to = loginUserRecord.emailId();
 						String subject = "Check out this URL to verify";
-						String url = "http://localhost:8659/ipsator.com/user/finalLogin?loginKey=" + loginKey;
+						String url = "http://localhost:8659/ipsator.com/user/final-login?loginKey=" + loginKey;
 
 						loginEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
 
@@ -276,7 +273,7 @@ public class UserServiceImplementation implements UserService {
 
 			String to = loginUserRecord.emailId();
 			String subject = "Check out this URL to verify";
-			String url = "http://localhost:8659/ipsator.com/user/finalLogin?loginKey=" + loginKey;
+			String url = "http://localhost:8659/ipsator.com/user/final-login?loginKey=" + loginKey;
 
 			loginEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
 
@@ -330,9 +327,16 @@ public class UserServiceImplementation implements UserService {
 	}
 
 	/**
-	 * 
-	 * @param email
-	 * @param password
+	 * Performs user authentication with the provided email and password.
+	 *
+	 * @param email    The email address of the user attempting to authenticate.
+	 * @param password The password associated with the user's email.
+	 * @throws BadCredentialsException If the provided email and password do not
+	 *                                 match any valid credentials, or if
+	 *                                 authentication fails for any other reason, a
+	 *                                 BadCredentialsException is thrown. The
+	 *                                 exception message indicates that the username
+	 *                                 or password is invalid.
 	 */
 	private void doAuthenticate(String email, String password) {
 
