@@ -101,22 +101,15 @@ public class UserServiceImplementation implements UserService {
 		// if this is user's first registration attempt
 		if (tempRegdAttemptTracker == null) {
 			// this is the first registration attempt for the user
-			PreFinalUsers newTemporaryUser = new PreFinalUsers();
-			newTemporaryUser.setFirstName(registerUserRecord.firstName());
-			newTemporaryUser.setLastName(registerUserRecord.lastName());
-			newTemporaryUser.setEmailId(registerUserRecord.emailId());
-			newTemporaryUser.setGender(registerUserRecord.gender());
-			newTemporaryUser.setAge(registerUserRecord.age());
-			String registrationKey = UUID.randomUUID().toString();
-			newTemporaryUser.setRegistrationKey(registrationKey);
-			newTemporaryUser.setKeyGenerationTime(LocalDateTime.now());
-			newTemporaryUser.setUserStatus("Verification Pending");
 
-			String to = registerUserRecord.emailId();
-			String subject = "Check out this URL to complete your registration.";
-			String url = "http://localhost:8659/ipsator.com/user/final-registration?registrationKey=" + registrationKey;
+			PreFinalUsers newTemporaryUser = createNewPreFinalUser(registerUserRecord.firstName(),
+					registerUserRecord.lastName(), registerUserRecord.emailId(), registerUserRecord.gender(),
+					registerUserRecord.age());
 
-			signupEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
+			signupEmailServiceImplementation.sendEmailWithUrl(registerUserRecord.emailId(),
+					"Check out this URL to complete your registration.",
+					"http://localhost:8659/ipsator.com/user/final-registration?registrationKey="
+							+ newTemporaryUser.getRegistrationKey());
 
 			PreFinalUsers savedTemporaryUser = preFinalUsersRepository.save(newTemporaryUser);
 
@@ -148,22 +141,15 @@ public class UserServiceImplementation implements UserService {
 		if (totalSeconds > (30 * 60)) {
 			// it is not
 			// reset the Tracking Start Time for the same user
-			PreFinalUsers newTemporaryUser = new PreFinalUsers();
-			newTemporaryUser.setFirstName(registerUserRecord.firstName());
-			newTemporaryUser.setLastName(registerUserRecord.lastName());
-			newTemporaryUser.setEmailId(registerUserRecord.emailId());
-			newTemporaryUser.setGender(registerUserRecord.gender());
-			newTemporaryUser.setAge(registerUserRecord.age());
-			String registrationKey = UUID.randomUUID().toString();
-			newTemporaryUser.setRegistrationKey(registrationKey);
-			newTemporaryUser.setKeyGenerationTime(LocalDateTime.now());
-			newTemporaryUser.setUserStatus("Verification Pending");
 
-			String to = registerUserRecord.emailId();
-			String subject = "Check out this URL to complete your registration.";
-			String url = "http://localhost:8659/ipsator.com/user/final-registration?registrationKey=" + registrationKey;
+			PreFinalUsers newTemporaryUser = createNewPreFinalUser(registerUserRecord.firstName(),
+					registerUserRecord.lastName(), registerUserRecord.emailId(), registerUserRecord.gender(),
+					registerUserRecord.age());
 
-			signupEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
+			signupEmailServiceImplementation.sendEmailWithUrl(registerUserRecord.emailId(),
+					"Check out this URL to complete your registration.",
+					"http://localhost:8659/ipsator.com/user/final-registration?registrationKey="
+							+ newTemporaryUser.getRegistrationKey());
 
 			PreFinalUsers savedTemporaryUser = preFinalUsersRepository.save(newTemporaryUser);
 
@@ -179,9 +165,10 @@ public class UserServiceImplementation implements UserService {
 		List<PreFinalUsers> preFinalUsers = preFinalUsersRepository
 				.findByEmailId(tempRegdAttemptTracker.getUserEmailId());
 		long listSize = 0;
-		
-		for(PreFinalUsers preFinalUser:preFinalUsers) {
-			if(preFinalUser.getKeyGenerationTime().isAfter(tempRegdAttemptTracker.getTrackingStartTime()) && preFinalUser.getKeyGenerationTime().isBefore(LocalDateTime.now())) {
+
+		for (PreFinalUsers preFinalUser : preFinalUsers) {
+			if (preFinalUser.getKeyGenerationTime().isAfter(tempRegdAttemptTracker.getTrackingStartTime())
+					&& preFinalUser.getKeyGenerationTime().isBefore(LocalDateTime.now())) {
 				listSize++;
 			}
 		}
@@ -200,22 +187,15 @@ public class UserServiceImplementation implements UserService {
 		}
 
 		// else just save the user as a pre-final user
-		PreFinalUsers newTemporaryUser = new PreFinalUsers();
-		newTemporaryUser.setFirstName(registerUserRecord.firstName());
-		newTemporaryUser.setLastName(registerUserRecord.lastName());
-		newTemporaryUser.setEmailId(registerUserRecord.emailId());
-		newTemporaryUser.setGender(registerUserRecord.gender());
-		newTemporaryUser.setAge(registerUserRecord.age());
-		String registrationKey = UUID.randomUUID().toString();
-		newTemporaryUser.setRegistrationKey(registrationKey);
-		newTemporaryUser.setKeyGenerationTime(LocalDateTime.now());
-		newTemporaryUser.setUserStatus("Verification Pending");
 
-		String to = registerUserRecord.emailId();
-		String subject = "Check out this URL to complete your registration.";
-		String url = "http://localhost:8659/ipsator.com/user/final-registration?registrationKey=" + registrationKey;
+		PreFinalUsers newTemporaryUser = createNewPreFinalUser(registerUserRecord.firstName(),
+				registerUserRecord.lastName(), registerUserRecord.emailId(), registerUserRecord.gender(),
+				registerUserRecord.age());
 
-		signupEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
+		signupEmailServiceImplementation.sendEmailWithUrl(registerUserRecord.emailId(),
+				"Check out this URL to complete your registration.",
+				"http://localhost:8659/ipsator.com/user/final-registration?registrationKey="
+						+ newTemporaryUser.getRegistrationKey());
 
 		PreFinalUsers savedTemporaryUser = preFinalUsersRepository.save(newTemporaryUser);
 
@@ -320,11 +300,9 @@ public class UserServiceImplementation implements UserService {
 					existingLoginKeyDetails.setKeyGenerationTime(LocalDateTime.now());
 					loginKeysRepository.save(existingLoginKeyDetails);
 
-					String to = loginUserRecord.emailId();
-					String subject = "Check out this URL to verify";
-					String url = "http://localhost:8659/ipsator.com/user/final-login?loginKey=" + loginKey;
-
-					loginEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
+					loginEmailServiceImplementation.sendEmailWithUrl(loginUserRecord.emailId(),
+							"Check out this URL to verify",
+							"http://localhost:8659/ipsator.com/user/final-login?loginKey=" + loginKey);
 
 					ServiceResponse<String> response = new ServiceResponse<>(true,
 							"Email sent with login verification link. It will expire after 15 minutes. Login Key: "
@@ -355,11 +333,9 @@ public class UserServiceImplementation implements UserService {
 
 						loginKeysRepository.save(existingLoginKeyDetails);
 
-						String to = loginUserRecord.emailId();
-						String subject = "Check out this URL to verify";
-						String url = "http://localhost:8659/ipsator.com/user/final-login?loginKey=" + loginKey;
-
-						loginEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
+						loginEmailServiceImplementation.sendEmailWithUrl(loginUserRecord.emailId(),
+								"Check out this URL to verify",
+								"http://localhost:8659/ipsator.com/user/final-login?loginKey=" + loginKey);
 
 						ServiceResponse<String> response = new ServiceResponse<>(true,
 								"Email sent with login verification link. It will expire after 15 minutes. Login Key: "
@@ -387,11 +363,8 @@ public class UserServiceImplementation implements UserService {
 			newLoginKey.setConsecutiveAttemptCount(1);
 			loginKeysRepository.save(newLoginKey);
 
-			String to = loginUserRecord.emailId();
-			String subject = "Check out this URL to verify";
-			String url = "http://localhost:8659/ipsator.com/user/final-login?loginKey=" + loginKey;
-
-			loginEmailServiceImplementation.sendEmailWithUrl(to, subject, url);
+			loginEmailServiceImplementation.sendEmailWithUrl(loginUserRecord.emailId(), "Check out this URL to verify",
+					"http://localhost:8659/ipsator.com/user/final-login?loginKey=" + loginKey);
 
 			ServiceResponse<String> response = new ServiceResponse<>(true,
 					"Email sent with login verification link. It will expire after 15 minutes. Login Key: " + loginKey,
@@ -465,6 +438,39 @@ public class UserServiceImplementation implements UserService {
 			throw new BadCredentialsException(" Invalid Username or Password  !!");
 		}
 
+	}
+
+	/**
+	 * Creates a new PreFinalUsers object with the provided user information.
+	 *
+	 * This method creates a new PreFinalUsers object and populates it with the
+	 * provided user information, including first name, last name, email, gender,
+	 * age, and generates a unique registration key. The user's status is set to
+	 * "Verification Pending" and the key generation time is set to the current date
+	 * and time.
+	 *
+	 * @param firstName The first name of the user.
+	 * @param lastName  The last name of the user.
+	 * @param emailId   The email address of the user.
+	 * @param gender    The gender of the user.
+	 * @param age       The age of the user.
+	 * @return A newly created PreFinalUsers object with the provided information.
+	 */
+	private PreFinalUsers createNewPreFinalUser(String firstName, String lastName, String emailId, String gender,
+			Integer age) {
+
+		PreFinalUsers newTemporaryUser = new PreFinalUsers();
+		newTemporaryUser.setFirstName(firstName);
+		newTemporaryUser.setLastName(lastName);
+		newTemporaryUser.setEmailId(emailId);
+		newTemporaryUser.setGender(gender);
+		newTemporaryUser.setAge(age);
+		String registrationKey = UUID.randomUUID().toString();
+		newTemporaryUser.setRegistrationKey(registrationKey);
+		newTemporaryUser.setKeyGenerationTime(LocalDateTime.now());
+		newTemporaryUser.setUserStatus("Verification Pending");
+
+		return newTemporaryUser;
 	}
 
 }
