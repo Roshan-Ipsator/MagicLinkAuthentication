@@ -1,9 +1,7 @@
 package com.ipsator.MagicLinkAuthentication_System.ServiceImplementation;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -11,25 +9,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ipsator.MagicLinkAuthentication_System.Entity.LoginKeys;
-import com.ipsator.MagicLinkAuthentication_System.Entity.PreFinalUsers;
-import com.ipsator.MagicLinkAuthentication_System.Entity.TempRegdAttemptTracker;
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
 import com.ipsator.MagicLinkAuthentication_System.Payload.ServiceResponse;
 import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
-import com.ipsator.MagicLinkAuthentication_System.Record.RegisterUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Repository.LoginKeysRepository;
-import com.ipsator.MagicLinkAuthentication_System.Repository.PreFinalUsersRepository;
-import com.ipsator.MagicLinkAuthentication_System.Repository.TempRegdAttemptTrackerRepository;
 import com.ipsator.MagicLinkAuthentication_System.Repository.UserRepository;
 import com.ipsator.MagicLinkAuthentication_System.Security.JwtHelper;
 import com.ipsator.MagicLinkAuthentication_System.Service.UserService;
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 
 import jakarta.mail.MessagingException;
 
@@ -45,28 +35,19 @@ public class UserServiceImplementation implements UserService {
 	private UserRepository userRepository;
 
 	@Autowired
-	private PreFinalUsersRepository preFinalUsersRepository;
-
-	@Autowired
 	private LoginKeysRepository loginKeysRepository;
 
 	@Autowired
-	private TempRegdAttemptTrackerRepository tempRegdAttemptTrackerRepository;
+	private SignupEmailServiceImplementation signupEmailServiceImplementation;
 
 	@Autowired
 	private LoginEmailServiceImplementation loginEmailServiceImplementation;
-
-	@Autowired
-	private SignupEmailServiceImplementation signupEmailServiceImplementation;
 
 	@Autowired
 	private UserDetailsService userDetailsService;
 
 	@Autowired
 	private JwtHelper helper;
-
-	@Autowired
-	private PasswordEncoder passwordEncoder;
 
 	/**
 	 * 
@@ -79,127 +60,127 @@ public class UserServiceImplementation implements UserService {
 	 * @throws UserException, MessagingException
 	 * 
 	 */
-	@Override
-	public ServiceResponse<PreFinalUsers> preFinalUserRegistration(RegisterUserRecord registerUserRecord)
-			throws MessagingException {
-		Optional<User> existingUserOpt = userRepository.findByEmailId(registerUserRecord.emailId());
-
-		// if user is already registered after verification
-		if (existingUserOpt.isPresent()) {
-			ServiceResponse<PreFinalUsers> response = new ServiceResponse<>(false, null,
-					"Email Id already exists. Please, directly log in!");
-			return response;
-		}
-
-		// else
-		TempRegdAttemptTracker tempRegdAttemptTracker = tempRegdAttemptTrackerRepository
-				.findByUserEmailId(registerUserRecord.emailId());
-
-		// if this is user's first registration attempt
-		if (tempRegdAttemptTracker == null) {
-			// this is the first registration attempt for the user
-
-			PreFinalUsers newTemporaryUser = createNewPreFinalUser(registerUserRecord.firstName(),
-					registerUserRecord.lastName(), registerUserRecord.emailId(), registerUserRecord.gender(),
-					registerUserRecord.age());
-
-			signupEmailServiceImplementation.sendEmailWithUrl(registerUserRecord.emailId(),
-					"Check out this URL to complete your registration.",
-					"http://localhost:8659/ipsator.com/user/final-registration?registrationKey="
-							+ newTemporaryUser.getRegistrationKey());
-
-			PreFinalUsers savedTemporaryUser = preFinalUsersRepository.save(newTemporaryUser);
-
-			TempRegdAttemptTracker newTempRegdAttemptTracker = new TempRegdAttemptTracker();
-			newTempRegdAttemptTracker.setUserEmailId(savedTemporaryUser.getEmailId());
-			newTempRegdAttemptTracker.setTrackingStartTime(LocalDateTime.now());
-			tempRegdAttemptTrackerRepository.save(newTempRegdAttemptTracker);
-
-			ServiceResponse<PreFinalUsers> response = new ServiceResponse<>(true, savedTemporaryUser,
-					"Temporarily created the user. Registration verification link has been sent to the email. It will expire after 15 minutes.");
-			return response;
-		}
-
-		// check if user is locked or not
-		if (LocalDateTime.now().isBefore(tempRegdAttemptTracker.getTrackingStartTime())) {
-			// user is still locked
-			ServiceResponse<PreFinalUsers> response = new ServiceResponse<>(false, null,
-					"User is temporarily locked due to maximum registration attempt exceeded. Please, try after "
-							+ tempRegdAttemptTracker.getTrackingStartTime());
-			return response;
-		}
-
-		// if user is not locked
-		Duration duration = Duration.between(tempRegdAttemptTracker.getTrackingStartTime(), LocalDateTime.now());
-		long totalSeconds = duration.toSeconds();
-
-		// check if this attempt is within the 30 minutes from the current Tracking
-		// Start Time
-		if (totalSeconds > (30 * 60)) {
-			// it is not
-			// reset the Tracking Start Time for the same user
-
-			PreFinalUsers newTemporaryUser = createNewPreFinalUser(registerUserRecord.firstName(),
-					registerUserRecord.lastName(), registerUserRecord.emailId(), registerUserRecord.gender(),
-					registerUserRecord.age());
-
-			signupEmailServiceImplementation.sendEmailWithUrl(registerUserRecord.emailId(),
-					"Check out this URL to complete your registration.",
-					"http://localhost:8659/ipsator.com/user/final-registration?registrationKey="
-							+ newTemporaryUser.getRegistrationKey());
-
-			PreFinalUsers savedTemporaryUser = preFinalUsersRepository.save(newTemporaryUser);
-
-			tempRegdAttemptTracker.setTrackingStartTime(LocalDateTime.now());
-			tempRegdAttemptTrackerRepository.save(tempRegdAttemptTracker);
-
-			ServiceResponse<PreFinalUsers> response = new ServiceResponse<>(true, savedTemporaryUser,
-					"Temporarily created the user. Registration verification link has been sent to the email. It will expire after 15 minutes.");
-			return response;
-		}
-
-		// else if it is within that 30 minutes
-		List<PreFinalUsers> preFinalUsers = preFinalUsersRepository
-				.findByEmailId(tempRegdAttemptTracker.getUserEmailId());
-		long listSize = 0;
-
-		for (PreFinalUsers preFinalUser : preFinalUsers) {
-			if (preFinalUser.getKeyGenerationTime().isAfter(tempRegdAttemptTracker.getTrackingStartTime())
-					&& preFinalUser.getKeyGenerationTime().isBefore(LocalDateTime.now())) {
-				listSize++;
-			}
-		}
-
-		// if with in that 30 minutes, the attempt count is more than or equal to 5
-		// Temporarily lock the user for next 2 hours
-		if (listSize >= 5) {
-			LocalDateTime lockOutEndTime = LocalDateTime.now().plusHours(2);
-			tempRegdAttemptTracker.setTrackingStartTime(lockOutEndTime);
-			tempRegdAttemptTrackerRepository.save(tempRegdAttemptTracker);
-
-			ServiceResponse<PreFinalUsers> response = new ServiceResponse<>(false, null,
-					"User got temporarily locked due to maximum registration attempt exceeded. Please, try after "
-							+ lockOutEndTime);
-			return response;
-		}
-
-		// else just save the user as a pre-final user
-
-		PreFinalUsers newTemporaryUser = createNewPreFinalUser(registerUserRecord.firstName(),
-				registerUserRecord.lastName(), registerUserRecord.emailId(), registerUserRecord.gender(),
-				registerUserRecord.age());
-
-		signupEmailServiceImplementation.sendEmailWithUrl(registerUserRecord.emailId(),
-				"Check out this URL to complete your registration.",
-				"http://localhost:8659/ipsator.com/user/final-registration?registrationKey="
-						+ newTemporaryUser.getRegistrationKey());
-
-		PreFinalUsers savedTemporaryUser = preFinalUsersRepository.save(newTemporaryUser);
-
-		ServiceResponse<PreFinalUsers> response = new ServiceResponse<>(true, savedTemporaryUser,
-				"Temporarily created the user. Registration verification link has been sent to the email. It will expire after 15 minutes.");
-		return response;
-	}
+//	@Override
+//	public ServiceResponse<PreFinalUsers> preFinalUserRegistration(RegisterUserRecord registerUserRecord)
+//			throws MessagingException {
+//		Optional<User> existingUserOpt = userRepository.findByEmailId(registerUserRecord.emailId());
+//
+//		// if user is already registered after verification
+//		if (existingUserOpt.isPresent()) {
+//			ServiceResponse<PreFinalUsers> response = new ServiceResponse<>(false, null,
+//					"Email Id already exists. Please, directly log in!");
+//			return response;
+//		}
+//
+//		// else
+//		TempRegdAttemptTracker tempRegdAttemptTracker = tempRegdAttemptTrackerRepository
+//				.findByUserEmailId(registerUserRecord.emailId());
+//
+//		// if this is user's first registration attempt
+//		if (tempRegdAttemptTracker == null) {
+//			// this is the first registration attempt for the user
+//
+//			PreFinalUsers newTemporaryUser = createNewPreFinalUser(registerUserRecord.firstName(),
+//					registerUserRecord.lastName(), registerUserRecord.emailId(), registerUserRecord.gender(),
+//					registerUserRecord.age());
+//
+//			signupEmailServiceImplementation.sendEmailWithUrl(registerUserRecord.emailId(),
+//					"Check out this URL to complete your registration.",
+//					"http://localhost:8659/ipsator.com/user/final-registration?registrationKey="
+//							+ newTemporaryUser.getRegistrationKey());
+//
+//			PreFinalUsers savedTemporaryUser = preFinalUsersRepository.save(newTemporaryUser);
+//
+//			TempRegdAttemptTracker newTempRegdAttemptTracker = new TempRegdAttemptTracker();
+//			newTempRegdAttemptTracker.setUserEmailId(savedTemporaryUser.getEmailId());
+//			newTempRegdAttemptTracker.setTrackingStartTime(LocalDateTime.now());
+//			tempRegdAttemptTrackerRepository.save(newTempRegdAttemptTracker);
+//
+//			ServiceResponse<PreFinalUsers> response = new ServiceResponse<>(true, savedTemporaryUser,
+//					"Temporarily created the user. Registration verification link has been sent to the email. It will expire after 15 minutes.");
+//			return response;
+//		}
+//
+//		// check if user is locked or not
+//		if (LocalDateTime.now().isBefore(tempRegdAttemptTracker.getTrackingStartTime())) {
+//			// user is still locked
+//			ServiceResponse<PreFinalUsers> response = new ServiceResponse<>(false, null,
+//					"User is temporarily locked due to maximum registration attempt exceeded. Please, try after "
+//							+ tempRegdAttemptTracker.getTrackingStartTime());
+//			return response;
+//		}
+//
+//		// if user is not locked
+//		Duration duration = Duration.between(tempRegdAttemptTracker.getTrackingStartTime(), LocalDateTime.now());
+//		long totalSeconds = duration.toSeconds();
+//
+//		// check if this attempt is within the 30 minutes from the current Tracking
+//		// Start Time
+//		if (totalSeconds > (30 * 60)) {
+//			// it is not
+//			// reset the Tracking Start Time for the same user
+//
+//			PreFinalUsers newTemporaryUser = createNewPreFinalUser(registerUserRecord.firstName(),
+//					registerUserRecord.lastName(), registerUserRecord.emailId(), registerUserRecord.gender(),
+//					registerUserRecord.age());
+//
+//			signupEmailServiceImplementation.sendEmailWithUrl(registerUserRecord.emailId(),
+//					"Check out this URL to complete your registration.",
+//					"http://localhost:8659/ipsator.com/user/final-registration?registrationKey="
+//							+ newTemporaryUser.getRegistrationKey());
+//
+//			PreFinalUsers savedTemporaryUser = preFinalUsersRepository.save(newTemporaryUser);
+//
+//			tempRegdAttemptTracker.setTrackingStartTime(LocalDateTime.now());
+//			tempRegdAttemptTrackerRepository.save(tempRegdAttemptTracker);
+//
+//			ServiceResponse<PreFinalUsers> response = new ServiceResponse<>(true, savedTemporaryUser,
+//					"Temporarily created the user. Registration verification link has been sent to the email. It will expire after 15 minutes.");
+//			return response;
+//		}
+//
+//		// else if it is within that 30 minutes
+//		List<PreFinalUsers> preFinalUsers = preFinalUsersRepository
+//				.findByEmailId(tempRegdAttemptTracker.getUserEmailId());
+//		long listSize = 0;
+//
+//		for (PreFinalUsers preFinalUser : preFinalUsers) {
+//			if (preFinalUser.getKeyGenerationTime().isAfter(tempRegdAttemptTracker.getTrackingStartTime())
+//					&& preFinalUser.getKeyGenerationTime().isBefore(LocalDateTime.now())) {
+//				listSize++;
+//			}
+//		}
+//
+//		// if with in that 30 minutes, the attempt count is more than or equal to 5
+//		// Temporarily lock the user for next 2 hours
+//		if (listSize >= 5) {
+//			LocalDateTime lockOutEndTime = LocalDateTime.now().plusHours(2);
+//			tempRegdAttemptTracker.setTrackingStartTime(lockOutEndTime);
+//			tempRegdAttemptTrackerRepository.save(tempRegdAttemptTracker);
+//
+//			ServiceResponse<PreFinalUsers> response = new ServiceResponse<>(false, null,
+//					"User got temporarily locked due to maximum registration attempt exceeded. Please, try after "
+//							+ lockOutEndTime);
+//			return response;
+//		}
+//
+//		// else just save the user as a pre-final user
+//
+//		PreFinalUsers newTemporaryUser = createNewPreFinalUser(registerUserRecord.firstName(),
+//				registerUserRecord.lastName(), registerUserRecord.emailId(), registerUserRecord.gender(),
+//				registerUserRecord.age());
+//
+//		signupEmailServiceImplementation.sendEmailWithUrl(registerUserRecord.emailId(),
+//				"Check out this URL to complete your registration.",
+//				"http://localhost:8659/ipsator.com/user/final-registration?registrationKey="
+//						+ newTemporaryUser.getRegistrationKey());
+//
+//		PreFinalUsers savedTemporaryUser = preFinalUsersRepository.save(newTemporaryUser);
+//
+//		ServiceResponse<PreFinalUsers> response = new ServiceResponse<>(true, savedTemporaryUser,
+//				"Temporarily created the user. Registration verification link has been sent to the email. It will expire after 15 minutes.");
+//		return response;
+//	}
 
 	/**
 	 * 
@@ -213,45 +194,61 @@ public class UserServiceImplementation implements UserService {
 	 * 
 	 */
 	@Override
-	public ServiceResponse<User> finalUserRegistration(String registrationKey) {
-		PreFinalUsers existingTemporaryUser = preFinalUsersRepository.findByRegistrationKey(registrationKey);
-		if (existingTemporaryUser != null) {
-			Optional<User> existingUserOpt = userRepository.findByEmailId(existingTemporaryUser.getEmailId());
-			if (existingUserOpt.isPresent()) {
-				ServiceResponse<User> response = new ServiceResponse<>(false, null,
-						"Email Id already exists. Please, directly log in!");
-				return response;
-			}
-			long noOfMinutes = existingTemporaryUser.getKeyGenerationTime().until(LocalDateTime.now(),
-					ChronoUnit.MINUTES);
+	public ServiceResponse<User> userRegistration(String emailId) {
+		Optional<User> userOptional = userRepository.findByEmailId(emailId);
 
-			if (noOfMinutes > 15) {
-				ServiceResponse<User> response = new ServiceResponse<>(false, null,
-						"Registration key has expired. Please try again!");
-				return response;
-			}
-
-			User newUser = new User();
-			newUser.setUserId(existingTemporaryUser.getUserId());
-			newUser.setFirstName(existingTemporaryUser.getFirstName());
-			newUser.setLastName(existingTemporaryUser.getLastName());
-			newUser.setEmailId(existingTemporaryUser.getEmailId());
-			newUser.setGender(existingTemporaryUser.getGender());
-			newUser.setAge(existingTemporaryUser.getAge());
-			newUser.setPassKey(passwordEncoder.encode(registrationKey));
-
-			existingTemporaryUser.setUserStatus("Verified");
-
-			preFinalUsersRepository.save(existingTemporaryUser);
-
-			User savedUser = userRepository.save(newUser);
-			ServiceResponse<User> response = new ServiceResponse<>(true, savedUser, "User registered successfully.");
+		if (userOptional.isPresent()) {
+			ServiceResponse<User> response = new ServiceResponse<>(false, null,
+					"Email Id already exists. Please, directly login!");
 			return response;
 		}
 
-		ServiceResponse<User> response = new ServiceResponse<>(false, null,
-				"Invalid key. Please try with a valid key or try registering once again.");
+		User newUser = new User();
+		newUser.setEmailId(emailId);
+		newUser.setUserRegistrationTime(LocalDateTime.now());
+
+		User savedUser = userRepository.save(newUser);
+
+		ServiceResponse<User> response = new ServiceResponse<>(true, savedUser, "User registered successfully.");
 		return response;
+
+//		if (existingTemporaryUser != null) {
+//			Optional<User> existingUserOpt = userRepository.findByEmailId(existingTemporaryUser.getEmailId());
+//			if (existingUserOpt.isPresent()) {
+//				ServiceResponse<User> response = new ServiceResponse<>(false, null,
+//						"Email Id already exists. Please, directly log in!");
+//				return response;
+//			}
+//			long noOfMinutes = existingTemporaryUser.getKeyGenerationTime().until(LocalDateTime.now(),
+//					ChronoUnit.MINUTES);
+//
+//			if (noOfMinutes > 15) {
+//				ServiceResponse<User> response = new ServiceResponse<>(false, null,
+//						"Registration key has expired. Please try again!");
+//				return response;
+//			}
+//
+//			User newUser = new User();
+//			newUser.setUserId(existingTemporaryUser.getUserId());
+//			newUser.setFirstName(existingTemporaryUser.getFirstName());
+//			newUser.setLastName(existingTemporaryUser.getLastName());
+//			newUser.setEmailId(existingTemporaryUser.getEmailId());
+//			newUser.setGender(existingTemporaryUser.getGender());
+//			newUser.setAge(existingTemporaryUser.getAge());
+//			newUser.setPassKey(passwordEncoder.encode(registrationKey));
+//
+//			existingTemporaryUser.setUserStatus("Verified");
+//
+//			preFinalUsersRepository.save(existingTemporaryUser);
+//
+//			User savedUser = userRepository.save(newUser);
+//			ServiceResponse<User> response = new ServiceResponse<>(true, savedUser, "User registered successfully.");
+//			return response;
+//		}
+//
+//		ServiceResponse<User> response = new ServiceResponse<>(false, null,
+//				"Invalid key. Please try with a valid key or try registering once again.");
+//		return response;
 	}
 
 	/**
@@ -269,8 +266,10 @@ public class UserServiceImplementation implements UserService {
 	public ServiceResponse<String> preFinalUserLogin(LoginUserRecord loginUserRecord) throws MessagingException {
 		Optional<User> existingUserOpt = userRepository.findByEmailId(loginUserRecord.emailId());
 		if (existingUserOpt.isEmpty()) {
+			signupEmailServiceImplementation.sendEmailWithUrl(loginUserRecord.emailId(), "Check out this URL to verify",
+					"http://localhost:8659/ipsator.com/user/registration?emailId=" + loginUserRecord.emailId());
 			ServiceResponse<String> response = new ServiceResponse<>(false, null,
-					"Email Id is not registered. Please, sign up first!");
+					"Email Id is not registered. Please, sign up first by clicking on the link sent to your email id: "+loginUserRecord.emailId()+"!");
 			return response;
 		}
 
@@ -394,7 +393,7 @@ public class UserServiceImplementation implements UserService {
 			}
 
 			User existingUser = userRepository.findById(existingLoginKey.getUserId()).get();
-	
+
 			UserDetails userDetails = userDetailsService.loadUserByUsername(existingUser.getEmailId());
 			String token = this.helper.generateToken(userDetails);
 
@@ -422,21 +421,21 @@ public class UserServiceImplementation implements UserService {
 	 * @param age       The age of the user.
 	 * @return A newly created PreFinalUsers object with the provided information.
 	 */
-	private PreFinalUsers createNewPreFinalUser(String firstName, String lastName, String emailId, String gender,
-			Integer age) {
-
-		PreFinalUsers newTemporaryUser = new PreFinalUsers();
-		newTemporaryUser.setFirstName(firstName);
-		newTemporaryUser.setLastName(lastName);
-		newTemporaryUser.setEmailId(emailId);
-		newTemporaryUser.setGender(gender);
-		newTemporaryUser.setAge(age);
-		String registrationKey = UUID.randomUUID().toString();
-		newTemporaryUser.setRegistrationKey(registrationKey);
-		newTemporaryUser.setKeyGenerationTime(LocalDateTime.now());
-		newTemporaryUser.setUserStatus("Verification Pending");
-
-		return newTemporaryUser;
-	}
+//	private PreFinalUsers createNewPreFinalUser(String firstName, String lastName, String emailId, String gender,
+//			Integer age) {
+//
+//		PreFinalUsers newTemporaryUser = new PreFinalUsers();
+//		newTemporaryUser.setFirstName(firstName);
+//		newTemporaryUser.setLastName(lastName);
+//		newTemporaryUser.setEmailId(emailId);
+//		newTemporaryUser.setGender(gender);
+//		newTemporaryUser.setAge(age);
+//		String registrationKey = UUID.randomUUID().toString();
+//		newTemporaryUser.setRegistrationKey(registrationKey);
+//		newTemporaryUser.setKeyGenerationTime(LocalDateTime.now());
+//		newTemporaryUser.setUserStatus("Verification Pending");
+//
+//		return newTemporaryUser;
+//	}
 
 }

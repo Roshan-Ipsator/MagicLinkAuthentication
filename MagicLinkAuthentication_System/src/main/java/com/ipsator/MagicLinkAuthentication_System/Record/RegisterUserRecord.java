@@ -5,5 +5,5 @@ package com.ipsator.MagicLinkAuthentication_System.Record;
  * 
  * @author Roshan
  */
-public record RegisterUserRecord(String firstName, String lastName, String emailId, String gender, Integer age) {
+public record RegisterUserRecord(String firstName, String lastName, String gender, Integer age) {
 }

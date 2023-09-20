@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ipsator.MagicLinkAuthentication_System.Entity.PreFinalUsers;
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
 import com.ipsator.MagicLinkAuthentication_System.Payload.ApiResponse;
 import com.ipsator.MagicLinkAuthentication_System.Payload.Error;
@@ -49,27 +48,27 @@ public class UserController {
 	 * @return ResponseEntity object
 	 * @throws MessagingException
 	 */
-	@PostMapping("/pre-final-registration")
-	public ResponseEntity<ApiResponse> preFinalUserRegistration(@Valid @RequestBody RegisterUserRecord registerUserRecord)
-			throws MessagingException {
-		ServiceResponse<PreFinalUsers> savedTemporaryUser = userService.preFinalUserRegistration(registerUserRecord);
-		if (savedTemporaryUser.getSuccess()) {
-			return new ResponseEntity<>(new ApiResponse("success", savedTemporaryUser.getData(), null),
-					HttpStatus.CREATED);
-		}
-		return new ResponseEntity<>(new ApiResponse("error", null, new Error(savedTemporaryUser.getMessage())),
-				HttpStatus.BAD_REQUEST);
-	}
+//	@PostMapping("/pre-final-registration")
+//	public ResponseEntity<ApiResponse> preFinalUserRegistration(@Valid @RequestBody RegisterUserRecord registerUserRecord)
+//			throws MessagingException {
+//		ServiceResponse<PreFinalUsers> savedTemporaryUser = userService.preFinalUserRegistration(registerUserRecord);
+//		if (savedTemporaryUser.getSuccess()) {
+//			return new ResponseEntity<>(new ApiResponse("success", savedTemporaryUser.getData(), null),
+//					HttpStatus.CREATED);
+//		}
+//		return new ResponseEntity<>(new ApiResponse("error", null, new Error(savedTemporaryUser.getMessage())),
+//				HttpStatus.BAD_REQUEST);
+//	}
 
 	/**
-	 * API end point for Final User Registration
+	 * API end point for User Registration
 	 * 
 	 * @param registrationKey a String
 	 * @return ResponseEntity object
 	 */
-	@GetMapping("/final-registration")
-	public ResponseEntity<ApiResponse> finalUserRegistration(@RequestParam String registrationKey) {
-		ServiceResponse<User> savedUser = userService.finalUserRegistration(registrationKey);
+	@GetMapping("/registration")
+	public ResponseEntity<ApiResponse> finalUserRegistration(@RequestParam String emailId) {
+		ServiceResponse<User> savedUser = userService.userRegistration(emailId);
 		if (savedUser.getSuccess()) {
 			return new ResponseEntity<>(new ApiResponse("success", savedUser.getData(), null), HttpStatus.CREATED);
 		}
