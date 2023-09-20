@@ -44,10 +44,11 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-		http.csrf(csrf -> csrf.disable()).cors(cors -> cors.disable()).authorizeHttpRequests(auth -> auth
-				.requestMatchers("/ipsator.com/user/pre-final-registration", "/ipsator.com/user/final-registration",
-						"/ipsator.com/user/pre-final-login", "/ipsator.com/user/final-login")
-				.permitAll().anyRequest().authenticated()).exceptionHandling(ex -> ex.authenticationEntryPoint(point))
+		http.csrf(csrf -> csrf.disable()).cors(cors -> cors.disable())
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/ipsator.com/user/registration",
+						"/ipsator.com/user/pre-final-login", "/ipsator.com/user/final-login").permitAll().anyRequest()
+						.authenticated())
+				.exceptionHandling(ex -> ex.authenticationEntryPoint(point))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
 		http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);

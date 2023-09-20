@@ -1,6 +1,5 @@
 package com.ipsator.MagicLinkAuthentication_System.Service;
 
-import com.ipsator.MagicLinkAuthentication_System.Entity.PreFinalUsers;
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
 import com.ipsator.MagicLinkAuthentication_System.Payload.ServiceResponse;
 import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
@@ -27,8 +26,8 @@ public interface UserService {
 	 * @throws UserException, MessagingException
 	 * 
 	 */
-	public ServiceResponse<PreFinalUsers> preFinalUserRegistration(RegisterUserRecord registerUserRecord)
-			throws MessagingException;
+//	public ServiceResponse<PreFinalUsers> preFinalUserRegistration(RegisterUserRecord registerUserRecord)
+//			throws MessagingException;
 
 	/**
 	 * 
@@ -41,7 +40,7 @@ public interface UserService {
 	 * @throws UserException
 	 * 
 	 */
-	public ServiceResponse<User> finalUserRegistration(String registrationKey);
+	public ServiceResponse<User> userRegistration(String emailId);
 
 	/**
 	 * 
