@@ -60,9 +60,6 @@ public class UserServiceImplementation implements UserService {
 	private SignupEmailServiceImplementation signupEmailServiceImplementation;
 
 	@Autowired
-	private AuthenticationManager manager;
-
-	@Autowired
 	private UserDetailsService userDetailsService;
 
 	@Autowired
@@ -397,13 +394,7 @@ public class UserServiceImplementation implements UserService {
 			}
 
 			User existingUser = userRepository.findById(existingLoginKey.getUserId()).get();
-			System.out.println(existingUser.getEmailId() + " " + existingUser.getPassword());
-			boolean passwordMatches = passwordEncoder.matches("b38c6b23-5195-4544-bed3-a2ccc7bf4ae2",
-					existingUser.getPassword());
-			System.out.println(passwordMatches);
-			PreFinalUsers temporaryUser = preFinalUsersRepository.findById(existingUser.getUserId()).get();
-			this.doAuthenticate(existingUser.getEmailId(), temporaryUser.getRegistrationKey());
-			System.out.println(existingUser.getEmailId() + " " + existingUser.getPassword());
+	
 			UserDetails userDetails = userDetailsService.loadUserByUsername(existingUser.getEmailId());
 			String token = this.helper.generateToken(userDetails);
 
@@ -413,31 +404,6 @@ public class UserServiceImplementation implements UserService {
 		ServiceResponse<String> response = new ServiceResponse<>(false, null,
 				"Invalid login key. Please try with a valid key or try logging in once again.");
 		return response;
-	}
-
-	/**
-	 * Performs user authentication with the provided email and password.
-	 *
-	 * @param email    The email address of the user attempting to authenticate.
-	 * @param password The password associated with the user's email.
-	 * @throws BadCredentialsException If the provided email and password do not
-	 *                                 match any valid credentials, or if
-	 *                                 authentication fails for any other reason, a
-	 *                                 BadCredentialsException is thrown. The
-	 *                                 exception message indicates that the username
-	 *                                 or password is invalid.
-	 */
-	private void doAuthenticate(String email, String password) {
-
-		UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(email, password);
-		try {
-
-			manager.authenticate(authentication);
-
-		} catch (BadCredentialsException e) {
-			throw new BadCredentialsException(" Invalid Username or Password  !!");
-		}
-
 	}
 
 	/**
