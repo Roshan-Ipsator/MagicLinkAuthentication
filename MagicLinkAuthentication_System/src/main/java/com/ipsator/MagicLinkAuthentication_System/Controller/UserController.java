@@ -67,8 +67,9 @@ public class UserController {
 	 * @return ResponseEntity object
 	 */
 	@GetMapping("/registration")
-	public ResponseEntity<ApiResponse> finalUserRegistration(@RequestParam String emailId) {
-		ServiceResponse<User> savedUser = userService.userRegistration(emailId);
+	public ResponseEntity<ApiResponse> finalUserRegistration(@RequestParam String emailId,
+			@RequestParam String registrationKey) {
+		ServiceResponse<User> savedUser = userService.userRegistration(emailId, registrationKey);
 		if (savedUser.getSuccess()) {
 			return new ResponseEntity<>(new ApiResponse("success", savedUser.getData(), null), HttpStatus.CREATED);
 		}

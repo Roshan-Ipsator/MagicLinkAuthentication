@@ -48,6 +48,12 @@ public class User implements UserDetails {
 	private LocalDateTime userRegistrationTime;
 	
 	private LocalDateTime userUpdationTime;
+	
+	private String registrationKey;
+	
+	private LocalDateTime regdKeyGenerationTime;
+	
+	private String userStatus;
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {

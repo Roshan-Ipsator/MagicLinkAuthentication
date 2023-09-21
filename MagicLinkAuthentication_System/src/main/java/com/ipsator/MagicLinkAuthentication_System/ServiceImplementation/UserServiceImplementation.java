@@ -194,18 +194,42 @@ public class UserServiceImplementation implements UserService {
 	 * 
 	 */
 	@Override
-	public ServiceResponse<User> userRegistration(String emailId) {
+	public ServiceResponse<User> userRegistration(String emailId, String registrationKey) {
 		Optional<User> userOptional = userRepository.findByEmailId(emailId);
 
-		if (userOptional.isPresent()) {
+		if (userOptional.isPresent() && userOptional.get().getUserStatus().equals("Verified")) {
 			ServiceResponse<User> response = new ServiceResponse<>(false, null,
 					"Email Id already exists. Please, directly login!");
 			return response;
 		}
 
-		User newUser = new User();
+		User existingTemporaryUser = userRepository.findByRegistrationKey(registrationKey);
+
+		if (existingTemporaryUser == null) {
+			ServiceResponse<User> response = new ServiceResponse<>(false, null,
+					"Invalid Registration key. Please try again!");
+			return response;
+		}
+
+		if (existingTemporaryUser.getEmailId().equals(emailId) == false) {
+			ServiceResponse<User> response = new ServiceResponse<>(false, null,
+					"Registration key doesn't match with the provided email id. Please try again!");
+			return response;
+		}
+
+		long noOfMinutes = existingTemporaryUser.getRegdKeyGenerationTime().until(LocalDateTime.now(),
+				ChronoUnit.MINUTES);
+
+		if (noOfMinutes > 15) {
+			ServiceResponse<User> response = new ServiceResponse<>(false, null,
+					"Registration key has expired. Please try again!");
+			return response;
+		}
+
+		User newUser = userOptional.get();
 		newUser.setEmailId(emailId);
 		newUser.setUserRegistrationTime(LocalDateTime.now());
+		newUser.setUserStatus("Verified");
 
 		User savedUser = userRepository.save(newUser);
 
@@ -266,10 +290,21 @@ public class UserServiceImplementation implements UserService {
 	public ServiceResponse<String> preFinalUserLogin(LoginUserRecord loginUserRecord) throws MessagingException {
 		Optional<User> existingUserOpt = userRepository.findByEmailId(loginUserRecord.emailId());
 		if (existingUserOpt.isEmpty()) {
+			User newTempUser = new User();
+			newTempUser.setEmailId(loginUserRecord.emailId());
+			newTempUser.setUserStatus("Not Verified");
+			String registrationKey = UUID.randomUUID().toString();
+			newTempUser.setRegistrationKey(registrationKey);
+			newTempUser.setRegdKeyGenerationTime(LocalDateTime.now());
+			userRepository.save(newTempUser);
+			
 			signupEmailServiceImplementation.sendEmailWithUrl(loginUserRecord.emailId(), "Check out this URL to verify",
-					"http://localhost:8659/ipsator.com/user/registration?emailId=" + loginUserRecord.emailId());
+					"http://localhost:8659/ipsator.com/user/registration?emailId=" + loginUserRecord.emailId()
+							+ "&registrationKey=" + registrationKey);
+
 			ServiceResponse<String> response = new ServiceResponse<>(false, null,
-					"Email Id is not registered. Please, sign up first by clicking on the link sent to your email id: "+loginUserRecord.emailId()+"!");
+					"Email Id is not registered. Please, sign up first by clicking on the link sent to your email id: "
+							+ loginUserRecord.emailId() + "!");
 			return response;
 		}
 
