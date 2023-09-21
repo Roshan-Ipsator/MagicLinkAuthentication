@@ -23,4 +23,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 	 *         empty {@code Optional} if no matching user is found.
 	 */
 	Optional<User> findByEmailId(String emailId);
+	
+	User findByRegistrationKey(String registrationKey);
 }

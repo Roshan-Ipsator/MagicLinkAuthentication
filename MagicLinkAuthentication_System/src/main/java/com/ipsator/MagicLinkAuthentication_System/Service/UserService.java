@@ -40,7 +40,7 @@ public interface UserService {
 	 * @throws UserException
 	 * 
 	 */
-	public ServiceResponse<User> userRegistration(String emailId);
+	public ServiceResponse<User> userRegistration(String emailId, String registrationKey);
 
 	/**
 	 * 
