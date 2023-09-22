@@ -118,8 +118,13 @@ public class UserController {
 	 * @return List of users
 	 */
 	@GetMapping("/get-all-users")
-	public List<User> getAllUsers() {
-		return userRepository.findAll();
+	public ResponseEntity<ApiResponse> getAllUsers() {
+		ServiceResponse<List<User>> allUsersResponse = userService.getAllUsers();
+		if (allUsersResponse.getSuccess()) {
+			return new ResponseEntity<>(new ApiResponse("success", allUsersResponse.getData(), null), HttpStatus.OK);
+		}
+		return new ResponseEntity<>(new ApiResponse("error", null, new Error(allUsersResponse.getMessage())),
+				HttpStatus.BAD_REQUEST);
 	}
 
 }
