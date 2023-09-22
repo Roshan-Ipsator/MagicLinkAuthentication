@@ -1,5 +1,7 @@
 package com.ipsator.MagicLinkAuthentication_System.Service;
 
+import java.util.List;
+
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
 import com.ipsator.MagicLinkAuthentication_System.Payload.ServiceResponse;
 import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
@@ -15,19 +17,6 @@ import jakarta.mail.MessagingException;
  *
  */
 public interface UserService {
-	/**
-	 * 
-	 * The method to temporarily register a user before final verification
-	 * 
-	 * @param registerUserRecord object of RegisterUserRecord class
-	 * 
-	 * @return temporaryUser object
-	 * 
-	 * @throws UserException, MessagingException
-	 * 
-	 */
-//	public ServiceResponse<PreFinalUsers> preFinalUserRegistration(RegisterUserRecord registerUserRecord)
-//			throws MessagingException;
 
 	/**
 	 * 
@@ -67,5 +56,7 @@ public interface UserService {
 	 * 
 	 */
 	public ServiceResponse<String> finalUserLogin(String loginKey);
+	
+	public ServiceResponse<List<User>> getAllUsers();
 
 }

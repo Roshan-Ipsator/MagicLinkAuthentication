@@ -29,31 +29,35 @@ public class User implements UserDetails {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer userId;
-	
+
 //	@NotNull(message = "First name can't be null.")
 	private String firstName;
-	
+
 //	@NotNull(message = "Last name can't be null.")
 	private String lastName;
-	
+
 //	@Email(message = "Email must be a valid one.")
 	private String emailId;
-	
+
 //	@NotNull(message = "Gender can't be null.")
 	private String gender;
-	
+
 //	@NotNull(message = "Age can't be null.")
 	private Integer age;
-	
+
 	private LocalDateTime userRegistrationTime;
-	
+
 	private LocalDateTime userUpdationTime;
-	
+
 	private String registrationKey;
-	
+
 	private LocalDateTime regdKeyGenerationTime;
-	
+
 	private String userStatus;
+
+	private LocalDateTime trackingStartTime;
+
+	private Integer noOfAttempts;
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -90,5 +94,4 @@ public class User implements UserDetails {
 		return true;
 	}
 
-	
 }
