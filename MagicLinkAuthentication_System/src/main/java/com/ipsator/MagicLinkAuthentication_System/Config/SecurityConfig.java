@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,6 +16,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.ipsator.MagicLinkAuthentication_System.Security.JwtAuthenticationEntryPoint;
 import com.ipsator.MagicLinkAuthentication_System.Security.JwtAuthenticationFilter;
 
+import lombok.RequiredArgsConstructor;
+
 /**
  * A configuration class that contains beans of SecurityFilterChain and
  * DaoAuthenticationProvider
@@ -22,6 +26,8 @@ import com.ipsator.MagicLinkAuthentication_System.Security.JwtAuthenticationFilt
  *
  */
 @Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 	@Autowired
 	private JwtAuthenticationEntryPoint point;
@@ -45,8 +51,7 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
 		http.csrf(csrf -> csrf.disable()).cors(cors -> cors.disable())
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/ipsator.com/user/registration",
-						"/ipsator.com/user/pre-final-login", "/ipsator.com/user/final-login").permitAll().anyRequest()
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/ipsator.com/open/user/**").permitAll().anyRequest()
 						.authenticated())
 				.exceptionHandling(ex -> ex.authenticationEntryPoint(point))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
