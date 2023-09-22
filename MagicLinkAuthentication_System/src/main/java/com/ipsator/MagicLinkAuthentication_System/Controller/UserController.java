@@ -1,10 +1,12 @@
 package com.ipsator.MagicLinkAuthentication_System.Controller;
 
+import java.security.Principal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,97 +36,13 @@ import jakarta.validation.Valid;
  */
 @RestController
 @RequestMapping("/ipsator.com/user")
+@PreAuthorize("hasRole('USER')")
 public class UserController {
-	@Autowired
-	private UserService userService;
 
-	@Autowired
-	private UserRepository userRepository;
-
-	/**
-	 * API end point for Pre-final User Registration
-	 * 
-	 * @param registerUserRecord object of RegisterUserRecord
-	 * @return ResponseEntity object
-	 * @throws MessagingException
-	 */
-//	@PostMapping("/pre-final-registration")
-//	public ResponseEntity<ApiResponse> preFinalUserRegistration(@Valid @RequestBody RegisterUserRecord registerUserRecord)
-//			throws MessagingException {
-//		ServiceResponse<PreFinalUsers> savedTemporaryUser = userService.preFinalUserRegistration(registerUserRecord);
-//		if (savedTemporaryUser.getSuccess()) {
-//			return new ResponseEntity<>(new ApiResponse("success", savedTemporaryUser.getData(), null),
-//					HttpStatus.CREATED);
-//		}
-//		return new ResponseEntity<>(new ApiResponse("error", null, new Error(savedTemporaryUser.getMessage())),
-//				HttpStatus.BAD_REQUEST);
-//	}
-
-	/**
-	 * API end point for User Registration
-	 * 
-	 * @param registrationKey a String
-	 * @return ResponseEntity object
-	 */
-	@GetMapping("/registration")
-	public ResponseEntity<ApiResponse> finalUserRegistration(@RequestParam String emailId,
-			@RequestParam String registrationKey) {
-		ServiceResponse<User> savedUser = userService.userRegistration(emailId, registrationKey);
-		if (savedUser.getSuccess()) {
-			return new ResponseEntity<>(new ApiResponse("success", savedUser.getData(), null), HttpStatus.CREATED);
-		}
-		return new ResponseEntity<>(new ApiResponse("error", null, new Error(savedUser.getMessage())),
-				HttpStatus.BAD_REQUEST);
-	}
-
-	/**
-	 * API end point for Pre-final User Login
-	 * 
-	 * @param loginUserRecord object of LoginUserRecord
-	 * @return ResponseEntity object
-	 * @throws MessagingException
-	 */
-	@PostMapping("/pre-final-login")
-	public ResponseEntity<ApiResponse> preFinalUserLogin(@RequestBody LoginUserRecord loginUserRecord)
-			throws MessagingException {
-		ServiceResponse<String> loginKeyConfirmation = userService.preFinalUserLogin(loginUserRecord);
-		if (loginKeyConfirmation.getSuccess()) {
-			return new ResponseEntity<>(new ApiResponse("success", loginKeyConfirmation.getData(), null),
-					HttpStatus.OK);
-		}
-		return new ResponseEntity<>(new ApiResponse("error", null, new Error(loginKeyConfirmation.getMessage())),
-				HttpStatus.BAD_REQUEST);
-	}
-
-	/**
-	 * API end point for Final User Login
-	 * 
-	 * @param loginKey a String
-	 * @return ResponseEntity object
-	 */
-	@GetMapping("/final-login")
-	public ResponseEntity<ApiResponse> userLoginFinal(@RequestParam String loginKey) {
-		ServiceResponse<String> loggedInUser = userService.finalUserLogin(loginKey);
-		if (loggedInUser.getSuccess()) {
-			return new ResponseEntity<>(new ApiResponse("success", loggedInUser.getData(), null), HttpStatus.OK);
-		}
-		return new ResponseEntity<>(new ApiResponse("error", null, new Error(loggedInUser.getMessage())),
-				HttpStatus.BAD_REQUEST);
-	}
-
-	/**
-	 * API end point for Getting All Users
-	 * 
-	 * @return List of users
-	 */
-	@GetMapping("/get-all-users")
-	public ResponseEntity<ApiResponse> getAllUsers() {
-		ServiceResponse<List<User>> allUsersResponse = userService.getAllUsers();
-		if (allUsersResponse.getSuccess()) {
-			return new ResponseEntity<>(new ApiResponse("success", allUsersResponse.getData(), null), HttpStatus.OK);
-		}
-		return new ResponseEntity<>(new ApiResponse("error", null, new Error(allUsersResponse.getMessage())),
-				HttpStatus.BAD_REQUEST);
+	@GetMapping("/username")
+	@PreAuthorize("hasAuthority('user:read')")
+	public ResponseEntity<String> getUserName(Principal principal) {
+		return new ResponseEntity<>("Currently authenticated user's username: " + principal.getName(), HttpStatus.OK);
 	}
 
 }

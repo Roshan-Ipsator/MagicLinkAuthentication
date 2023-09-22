@@ -6,7 +6,11 @@ import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.ipsator.MagicLinkAuthentication_System.Role_Permission.Role;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -45,6 +49,9 @@ public class User implements UserDetails {
 //	@NotNull(message = "Age can't be null.")
 	private Integer age;
 
+	@Enumerated(EnumType.STRING)
+	private Role role;
+
 	private LocalDateTime userRegistrationTime;
 
 	private LocalDateTime userUpdationTime;
@@ -61,7 +68,7 @@ public class User implements UserDetails {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return null;
+		return role.getAuthorities();
 	}
 
 	@Override

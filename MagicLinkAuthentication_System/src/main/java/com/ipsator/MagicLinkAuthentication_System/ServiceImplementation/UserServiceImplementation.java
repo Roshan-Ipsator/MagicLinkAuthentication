@@ -15,6 +15,7 @@ import com.ipsator.MagicLinkAuthentication_System.Payload.ServiceResponse;
 import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Repository.LoginKeysRepository;
 import com.ipsator.MagicLinkAuthentication_System.Repository.UserRepository;
+import com.ipsator.MagicLinkAuthentication_System.Role_Permission.Role;
 import com.ipsator.MagicLinkAuthentication_System.Security.JwtHelper;
 import com.ipsator.MagicLinkAuthentication_System.Service.UserService;
 
@@ -107,6 +108,7 @@ public class UserServiceImplementation implements UserService {
 		User newUser = userOptional.get();
 		newUser.setEmailId(emailId);
 		newUser.setUserRegistrationTime(LocalDateTime.now());
+		newUser.setRole(Role.ADMIN);
 		newUser.setUserStatus("Verified");
 
 		User savedUser = userRepository.save(newUser);
@@ -145,7 +147,7 @@ public class UserServiceImplementation implements UserService {
 
 			// sending email for registration
 			signupEmailServiceImplementation.sendEmailWithUrl(loginUserRecord.emailId(), "Check out this URL to verify",
-					"http://localhost:8659/ipsator.com/user/registration?emailId=" + loginUserRecord.emailId()
+					"http://localhost:8659/ipsator.com/open/user/registration?emailId=" + loginUserRecord.emailId()
 							+ "&registrationKey=" + registrationKey);
 
 			ServiceResponse<String> response = new ServiceResponse<>(false, null,
@@ -186,7 +188,7 @@ public class UserServiceImplementation implements UserService {
 
 				// sending email for registration
 				signupEmailServiceImplementation.sendEmailWithUrl(loginUserRecord.emailId(),
-						"Check out this URL to verify", "http://localhost:8659/ipsator.com/user/registration?emailId="
+						"Check out this URL to verify", "http://localhost:8659/ipsator.com/open/user/registration?emailId="
 								+ loginUserRecord.emailId() + "&registrationKey=" + registrationKey);
 
 				ServiceResponse<String> response = new ServiceResponse<>(true,
@@ -229,7 +231,7 @@ public class UserServiceImplementation implements UserService {
 					// sending email for registration
 					signupEmailServiceImplementation.sendEmailWithUrl(loginUserRecord.emailId(),
 							"Check out this URL to verify",
-							"http://localhost:8659/ipsator.com/user/registration?emailId=" + loginUserRecord.emailId()
+							"http://localhost:8659/ipsator.com/open/user/registration?emailId=" + loginUserRecord.emailId()
 									+ "&registrationKey=" + registrationKey);
 
 					ServiceResponse<String> response = new ServiceResponse<>(true,
@@ -270,7 +272,7 @@ public class UserServiceImplementation implements UserService {
 					// sending email for login
 					loginEmailServiceImplementation.sendEmailWithUrl(loginUserRecord.emailId(),
 							"Check out this URL to verify",
-							"http://localhost:8659/ipsator.com/user/final-login?loginKey=" + loginKey);
+							"http://localhost:8659/ipsator.com/open/user/final-login?loginKey=" + loginKey);
 
 					ServiceResponse<String> response = new ServiceResponse<>(true,
 							"Email sent with login verification link to the email id: "+loginUserRecord.emailId()+". It will expire after 15 minutes!",
@@ -304,7 +306,7 @@ public class UserServiceImplementation implements UserService {
 						// sending email for login
 						loginEmailServiceImplementation.sendEmailWithUrl(loginUserRecord.emailId(),
 								"Check out this URL to verify",
-								"http://localhost:8659/ipsator.com/user/final-login?loginKey=" + loginKey);
+								"http://localhost:8659/ipsator.com/open/user/final-login?loginKey=" + loginKey);
 
 						ServiceResponse<String> response = new ServiceResponse<>(true,
 								"Email sent with login verification link to the email id: "+loginUserRecord.emailId()+". It will expire after 15 minutes!",
@@ -333,7 +335,7 @@ public class UserServiceImplementation implements UserService {
 
 			// sending email for login
 			loginEmailServiceImplementation.sendEmailWithUrl(loginUserRecord.emailId(), "Check out this URL to verify",
-					"http://localhost:8659/ipsator.com/user/final-login?loginKey=" + loginKey);
+					"http://localhost:8659/ipsator.com/open/user/final-login?loginKey=" + loginKey);
 
 			ServiceResponse<String> response = new ServiceResponse<>(true,
 					"Email sent with login verification link to the email id: "+loginUserRecord.emailId()+". It will expire after 15 minutes!",
