@@ -31,7 +31,6 @@ import lombok.NoArgsConstructor;
 @Entity
 public class User implements UserDetails {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer userId;
 
 //	@NotNull(message = "First name can't be null.")
@@ -55,16 +54,6 @@ public class User implements UserDetails {
 	private LocalDateTime userRegistrationTime;
 
 	private LocalDateTime userUpdationTime;
-
-	private String registrationKey;
-
-	private LocalDateTime regdKeyGenerationTime;
-
-	private String userStatus;
-
-	private LocalDateTime trackingStartTime;
-
-	private Integer noOfAttempts;
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
