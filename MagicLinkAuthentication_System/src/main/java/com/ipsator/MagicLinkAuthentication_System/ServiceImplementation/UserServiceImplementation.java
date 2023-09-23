@@ -418,12 +418,11 @@ public class UserServiceImplementation implements UserService {
 
 			if (existingUserOptional.isPresent()) {
 				User existingUser = existingUserOptional.get();
-//				if (((existingUser.getRole().equals(Role.USER_ALL_ACCESS)
-//						|| existingUser.getRole().equals(Role.USER_UPDATE_ACCESS))
-//						&& existingUser.getEmailId().equals(username))
-//						|| (existingUser.getRole().equals(Role.ADMIN_ALL_ACCESS)
-//								|| existingUser.getRole().equals(Role.ADMIN_UPDATE_ACCESS))) {
-//				if (existingUser.getRole().equals("ADMIN_ALL_ACCESS")) {
+				if (((existingUser.getRole().equals(Role.USER_ALL_ACCESS)
+						|| existingUser.getRole().equals(Role.USER_UPDATE_ACCESS))
+						&& existingUser.getEmailId().equals(username))
+						|| (existingUser.getRole().equals(Role.ADMIN_ALL_ACCESS)
+								|| existingUser.getRole().equals(Role.ADMIN_UPDATE_ACCESS))) {
 					existingUser.setFirstName(setProfileDetailsRecord.getFirstName());
 					existingUser.setLastName(setProfileDetailsRecord.getLastName());
 					existingUser.setAge(setProfileDetailsRecord.getAge());
@@ -437,11 +436,11 @@ public class UserServiceImplementation implements UserService {
 							"Current authenticated user successfully updated.");
 
 					return response;
-//				}
-//				ServiceResponse<User> response = new ServiceResponse<>(false, null,
-//						"Only admins with all and update access and the owner of the provided email id with all and update access can update user details.");
-//
-//				return response;
+				}
+				ServiceResponse<User> response = new ServiceResponse<>(false, null,
+						"Only admins with all and update access and the owner of the provided email id with all and update access can update user details.");
+
+				return response;
 			}
 			ServiceResponse<User> response = new ServiceResponse<>(false, null,
 					"No user found with this email id: " + setProfileDetailsRecord.getEmailId());

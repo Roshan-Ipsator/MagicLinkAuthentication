@@ -24,7 +24,7 @@ public class CommonController {
 	private UserService userService;
 
 	@PutMapping("/update-user")
-//	@PreAuthorize("hasAnyRole('USER_ALL_ACCESS', 'USER_UPDATE_ACCESS', 'ADMIN_ALL_ACCESS','ADMIN_UPDATE_ACCESS')")
+	@PreAuthorize("hasAnyRole('USER_ALL_ACCESS', 'USER_UPDATE_ACCESS', 'ADMIN_ALL_ACCESS','ADMIN_UPDATE_ACCESS')")
 	public ResponseEntity<ApiResponse> setProfileDetails(@RequestBody SetProfileDetailsRecord setProfileDetailsRecord) {
 		ServiceResponse<User> response = userService.setProfileDetails(setProfileDetailsRecord);
 
