@@ -6,6 +6,7 @@ import com.ipsator.MagicLinkAuthentication_System.Entity.User;
 import com.ipsator.MagicLinkAuthentication_System.Payload.ServiceResponse;
 import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Record.RegisterUserRecord;
+import com.ipsator.MagicLinkAuthentication_System.Record.SetProfileDetailsRecord;
 
 import jakarta.mail.MessagingException;
 
@@ -58,5 +59,7 @@ public interface UserService {
 	public ServiceResponse<String> finalUserLogin(String loginKey);
 	
 	public ServiceResponse<List<User>> getAllUsers();
+	
+	public ServiceResponse<User> setProfileDetails(SetProfileDetailsRecord setProfileDetailsRecord);
 
 }

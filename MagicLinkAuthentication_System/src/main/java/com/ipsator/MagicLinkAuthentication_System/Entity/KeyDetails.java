@@ -3,6 +3,8 @@ package com.ipsator.MagicLinkAuthentication_System.Entity;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,10 +19,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class LoginKeys {
+public class KeyDetails {
 	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer userId;
-	private String loginKey;
+	private String emailId;
+	private String signUpLogInKey;
 	private LocalDateTime keyGenerationTime;
 	private Integer consecutiveAttemptCount;
 	private LocalDateTime trackingStartTime;
