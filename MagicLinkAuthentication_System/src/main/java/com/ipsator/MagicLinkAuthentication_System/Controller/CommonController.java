@@ -26,12 +26,8 @@ public class CommonController {
 	@PutMapping("/update-user")
 	@PreAuthorize("hasAnyRole('USER_ALL_ACCESS', 'USER_UPDATE_ACCESS', 'ADMIN_ALL_ACCESS','ADMIN_UPDATE_ACCESS')")
 	public ResponseEntity<ApiResponse> setProfileDetails(@RequestBody SetProfileDetailsRecord setProfileDetailsRecord) {
-		ServiceResponse<User> response = userService.setProfileDetails(setProfileDetailsRecord);
-
-		if (response.getSuccess()) {
-			return new ResponseEntity<>(new ApiResponse("success", response.getData(), null), HttpStatus.OK);
-		}
-		return new ResponseEntity<>(new ApiResponse("error", null, new Error(response.getMessage())),
-				HttpStatus.BAD_REQUEST);
+		ResponseEntity<ApiResponse> setProfileDetailsResponse = userService.setProfileDetails(setProfileDetailsRecord)
+				.finalResponse();
+		return setProfileDetailsResponse;
 	}
 }
