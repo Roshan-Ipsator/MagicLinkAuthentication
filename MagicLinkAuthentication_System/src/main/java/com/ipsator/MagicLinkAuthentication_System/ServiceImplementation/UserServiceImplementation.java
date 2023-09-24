@@ -113,7 +113,7 @@ public class UserServiceImplementation implements UserService {
 		newUser.setUserId(existingKeyDetails.getUserId());
 		newUser.setEmailId(emailId);
 		newUser.setUserRegistrationTime(LocalDateTime.now());
-		newUser.setRole(Role.USER_DEFAULT_ACCESS);
+		newUser.setRole(Role.USER_UPDATE_ACCESS);
 
 		User savedUser = userRepository.save(newUser);
 
@@ -414,7 +414,7 @@ public class UserServiceImplementation implements UserService {
 			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 			String username = userDetails.getUsername();
 
-			Optional<User> existingUserOptional = userRepository.findByEmailId(setProfileDetailsRecord.getEmailId());
+			Optional<User> existingUserOptional = userRepository.findByEmailId(setProfileDetailsRecord.emailId());
 
 			if (existingUserOptional.isPresent()) {
 				User existingUser = existingUserOptional.get();
@@ -423,10 +423,10 @@ public class UserServiceImplementation implements UserService {
 						&& existingUser.getEmailId().equals(username))
 						|| (existingUser.getRole().equals(Role.ADMIN_ALL_ACCESS)
 								|| existingUser.getRole().equals(Role.ADMIN_UPDATE_ACCESS))) {
-					existingUser.setFirstName(setProfileDetailsRecord.getFirstName());
-					existingUser.setLastName(setProfileDetailsRecord.getLastName());
-					existingUser.setAge(setProfileDetailsRecord.getAge());
-					existingUser.setGender(setProfileDetailsRecord.getGender());
+					existingUser.setFirstName(setProfileDetailsRecord.firstName());
+					existingUser.setLastName(setProfileDetailsRecord.lastName());
+					existingUser.setAge(setProfileDetailsRecord.age());
+					existingUser.setGender(setProfileDetailsRecord.gender());
 
 					existingUser.setUserUpdationTime(LocalDateTime.now());
 
@@ -443,7 +443,7 @@ public class UserServiceImplementation implements UserService {
 				return response;
 			}
 			ServiceResponse<User> response = new ServiceResponse<>(false, null,
-					"No user found with this email id: " + setProfileDetailsRecord.getEmailId());
+					"No user found with this email id: " + setProfileDetailsRecord.emailId());
 
 			return response;
 		} else {
