@@ -113,7 +113,7 @@ public class UserServiceImplementation implements UserService {
 		newUser.setUserId(existingKeyDetails.getUserId());
 		newUser.setEmailId(emailId);
 		newUser.setUserRegistrationTime(LocalDateTime.now());
-		newUser.setRole(Role.USER_UPDATE_ACCESS);
+		newUser.setRole(Role.USER_DEFAULT_ACCESS);
 
 		User savedUser = userRepository.save(newUser);
 
