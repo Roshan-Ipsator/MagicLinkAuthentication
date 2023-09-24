@@ -63,7 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				logger.info("Given jwt token is expired !!");
 				e.printStackTrace();
 			} catch (MalformedJwtException e) {
-				logger.info("Some changed has done in token !! Invalid Token");
+				logger.info("Some changes has been done in token !! Invalid Token");
 				e.printStackTrace();
 			} catch (Exception e) {
 				e.printStackTrace();
