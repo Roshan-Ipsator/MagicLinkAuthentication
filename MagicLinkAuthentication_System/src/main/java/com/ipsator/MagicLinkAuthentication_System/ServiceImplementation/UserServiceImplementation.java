@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.ipsator.MagicLinkAuthentication_System.Entity.KeyDetails;
@@ -54,6 +55,9 @@ public class UserServiceImplementation implements UserService {
 
 	@Autowired
 	private JwtHelper helper;
+	
+	@Autowired
+    private Environment environment;
 
 	/**
 	 * 
@@ -101,7 +105,7 @@ public class UserServiceImplementation implements UserService {
 		long noOfMinutes = existingKeyDetails.getKeyGenerationTime().until(LocalDateTime.now(), ChronoUnit.MINUTES);
 
 		// if registration key has expired
-		if (noOfMinutes > 15) {
+		if (noOfMinutes > environment.getProperty("magic.link.expiration.time.minutes", Long.class)) {
 			ServiceResponse<User> response = new ServiceResponse<>(false, null,
 					"Registration key has expired. Please try again!");
 			return response;
@@ -187,7 +191,7 @@ public class UserServiceImplementation implements UserService {
 					LocalDateTime.now());
 
 			// if the interval is more than 30 minutes
-			if (intervalInSeconds > (30 * 60)) {
+			if (intervalInSeconds > environment.getProperty("time.bound.duration.seconds", Long.class)) {
 				// reset the values of tracking start time and no of attempts
 				existingKeyDetails.setTrackingStartTime(LocalDateTime.now());
 				existingKeyDetails.setConsecutiveAttemptCount(1);
@@ -210,15 +214,15 @@ public class UserServiceImplementation implements UserService {
 			}
 
 			// else if the interval is less than 30 minutes
-			if (intervalInSeconds <= (30 * 60)) {
+			if (intervalInSeconds <= environment.getProperty("time.bound.duration.seconds", Long.class)) {
 				// check the no of temporary registration attempts left
 				int noOfSignUpAttemptsMade = existingKeyDetails.getConsecutiveAttemptCount();
 
 				// if the user has already reached the maximum limit
-				if (noOfSignUpAttemptsMade >= 5) {
+				if (noOfSignUpAttemptsMade >= environment.getProperty("max.consecutive.attempts", Long.class)) {
 					// lock the user temporarily for next 2 hours
 //						LocalDateTime lockOutEndTime = LocalDateTime.now().plusHours(2);
-					LocalDateTime lockOutEndTime = LocalDateTime.now().plusMinutes(2);
+					LocalDateTime lockOutEndTime = LocalDateTime.now().plusMinutes(environment.getProperty("lockout.time.duration.hours", Long.class));
 					existingKeyDetails.setTrackingStartTime(lockOutEndTime);
 					existingKeyDetails.setConsecutiveAttemptCount(0);
 					keyDetailsRepository.save(existingKeyDetails);
@@ -273,7 +277,7 @@ public class UserServiceImplementation implements UserService {
 
 			// if interval is more than 30 minutes --> reset trackingStartTime and no of
 			// login attempts
-			if (currentIntervalInSeconds > (30 * 60)) {
+			if (currentIntervalInSeconds > environment.getProperty("time.bound.duration.seconds", Long.class)) {
 				keyDetails.setTrackingStartTime(LocalDateTime.now());
 				keyDetails.setConsecutiveAttemptCount(1);
 				String loginKey = UUID.randomUUID().toString();
@@ -294,7 +298,7 @@ public class UserServiceImplementation implements UserService {
 			} else {
 				// check the no of login attempts left
 				int noOfLoginAttemptsMade = keyDetails.getConsecutiveAttemptCount();
-				if (noOfLoginAttemptsMade >= 5) {
+				if (noOfLoginAttemptsMade >= environment.getProperty("max.consecutive.attempts", Long.class)) {
 					// lock the user temporarily for next 2 hours
 //						LocalDateTime lockOutEndTime = LocalDateTime.now().plusHours(2);
 					LocalDateTime lockOutEndTime = LocalDateTime.now().plusMinutes(2);
@@ -374,7 +378,7 @@ public class UserServiceImplementation implements UserService {
 		if (existingKeyDetails != null) {
 			long noOfMinutes = existingKeyDetails.getKeyGenerationTime().until(LocalDateTime.now(), ChronoUnit.MINUTES);
 
-			if (noOfMinutes > 15) {
+			if (noOfMinutes > environment.getProperty("magic.link.expiration.time.minutes", Long.class)) {
 				ServiceResponse<String> response = new ServiceResponse<>(false, null,
 						"Login Key has expired. Please, try again!");
 				return response;
