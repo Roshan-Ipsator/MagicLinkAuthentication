@@ -6,22 +6,18 @@ import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.ipsator.MagicLinkAuthentication_System.Role_Permission.Role;
+import com.ipsator.MagicLinkAuthentication_System.Enums_Role_Permission.Role;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * An Entity to contain all details of users after final registration
+ * An Entity to contain all details of users
  * 
  * @author Roshan
  */
@@ -33,19 +29,14 @@ public class User implements UserDetails {
 	@Id
 	private Integer userId;
 
-//	@NotNull(message = "First name can't be null.")
 	private String firstName;
 
-//	@NotNull(message = "Last name can't be null.")
 	private String lastName;
 
-//	@Email(message = "Email must be a valid one.")
 	private String emailId;
 
-//	@NotNull(message = "Gender can't be null.")
 	private String gender;
 
-//	@NotNull(message = "Age can't be null.")
 	private Integer age;
 
 	@Enumerated(EnumType.STRING)

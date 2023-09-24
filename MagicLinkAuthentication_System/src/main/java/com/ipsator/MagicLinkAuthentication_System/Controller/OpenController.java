@@ -1,7 +1,6 @@
 package com.ipsator.MagicLinkAuthentication_System.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,15 +9,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ipsator.MagicLinkAuthentication_System.Entity.User;
 import com.ipsator.MagicLinkAuthentication_System.Payload.ApiResponse;
-import com.ipsator.MagicLinkAuthentication_System.Payload.Error;
-import com.ipsator.MagicLinkAuthentication_System.Payload.ServiceResponse;
 import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Service.UserService;
 
 import jakarta.mail.MessagingException;
 
+/**
+ * A controller class that contains API end points for user registration,
+ * pre-final user login, and final user login
+ * 
+ * @author Roshan
+ *
+ */
 @RestController
 @RequestMapping("/ipsator.com/open/user")
 public class OpenController {

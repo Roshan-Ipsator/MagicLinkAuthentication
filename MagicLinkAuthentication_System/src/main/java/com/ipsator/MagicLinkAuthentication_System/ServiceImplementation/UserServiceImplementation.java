@@ -12,12 +12,12 @@ import org.springframework.stereotype.Service;
 
 import com.ipsator.MagicLinkAuthentication_System.Entity.KeyDetails;
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
+import com.ipsator.MagicLinkAuthentication_System.Enums_Role_Permission.Role;
 import com.ipsator.MagicLinkAuthentication_System.Payload.ServiceResponse;
 import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Record.SetProfileDetailsRecord;
 import com.ipsator.MagicLinkAuthentication_System.Repository.KeyDetailsRepository;
 import com.ipsator.MagicLinkAuthentication_System.Repository.UserRepository;
-import com.ipsator.MagicLinkAuthentication_System.Role_Permission.Role;
 import com.ipsator.MagicLinkAuthentication_System.Security.JwtHelper;
 import com.ipsator.MagicLinkAuthentication_System.Service.UserService;
 
@@ -25,10 +25,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import jakarta.mail.MessagingException;
-import jakarta.validation.constraints.Email;
 
 /**
  * The implementation class of UserService interface
@@ -55,19 +53,26 @@ public class UserServiceImplementation implements UserService {
 
 	@Autowired
 	private JwtHelper helper;
-	
+
 	@Autowired
-    private Environment environment;
+	private Environment environment;
 
 	/**
+	 * Registers a new user based on the provided email address and registration
+	 * key.
 	 * 
-	 * The method to finally register a user after final verification
-	 * 
-	 * @param registrationKey a string to verify the user for complete registration
-	 * 
-	 * @return User object
-	 * 
-	 * @throws UserException
+	 * @param emailId         The email address for user registration.
+	 * @param registrationKey The registration key associated with the user.
+	 * @return A {@link ServiceResponse} indicating the registration status. - If
+	 *         the email address already exists, returns a response with
+	 *         {@code success=false} and an error message. - If the registration key
+	 *         is invalid, returns a response with {@code success=false} and an
+	 *         error message. - If the provided email address doesn't match the
+	 *         registration key, returns a response with {@code success=false} and
+	 *         an error message. - If the registration key has expired, returns a
+	 *         response with {@code success=false} and an error message. - If the
+	 *         registration is successful, returns a response with
+	 *         {@code success=true} and the registered {@link User} entity.
 	 * 
 	 */
 	@Override
@@ -134,11 +139,13 @@ public class UserServiceImplementation implements UserService {
 
 	/**
 	 * 
-	 * The method to send a verification email for the final login
+	 * The method to send a verification email for the final registration/ final
+	 * login
 	 * 
 	 * @param loginUserRecord object of LoginUserRecord contains the user's email id
 	 * 
-	 * @return loginKey a string to verify the user for final login
+	 * @return loginKey a string to verify the user for final registration/ final
+	 *         login
 	 * 
 	 * @throws UserException, MessagingException
 	 * 
@@ -221,8 +228,8 @@ public class UserServiceImplementation implements UserService {
 				// if the user has already reached the maximum limit
 				if (noOfSignUpAttemptsMade >= environment.getProperty("max.consecutive.attempts", Long.class)) {
 					// lock the user temporarily for next 2 hours
-//						LocalDateTime lockOutEndTime = LocalDateTime.now().plusHours(2);
-					LocalDateTime lockOutEndTime = LocalDateTime.now().plusMinutes(environment.getProperty("lockout.time.duration.hours", Long.class));
+					LocalDateTime lockOutEndTime = LocalDateTime.now()
+							.plusHours(environment.getProperty("lockout.time.duration.hours", Long.class));
 					existingKeyDetails.setTrackingStartTime(lockOutEndTime);
 					existingKeyDetails.setConsecutiveAttemptCount(0);
 					keyDetailsRepository.save(existingKeyDetails);
@@ -262,13 +269,9 @@ public class UserServiceImplementation implements UserService {
 		// if the user is eligible for login
 		// send the login verification email
 
-//		User existingUser = existingUserOpt.get();
 		// Check if it is the first login
 		KeyDetails keyDetails = keyDetailsRepository.findByEmailId(loginUserRecord.emailId());
-//		if (loginKeyDetails.isPresent()) {
-		// not first login
-//			KeyDetails existingLoginKeyDetails = loginKeyDetails.get();
-//
+
 		// check if user is temporarily locked or not
 		// if user is not locked temporarily
 		if (keyDetails.getTrackingStartTime().isBefore(LocalDateTime.now())) {
@@ -300,8 +303,8 @@ public class UserServiceImplementation implements UserService {
 				int noOfLoginAttemptsMade = keyDetails.getConsecutiveAttemptCount();
 				if (noOfLoginAttemptsMade >= environment.getProperty("max.consecutive.attempts", Long.class)) {
 					// lock the user temporarily for next 2 hours
-//						LocalDateTime lockOutEndTime = LocalDateTime.now().plusHours(2);
-					LocalDateTime lockOutEndTime = LocalDateTime.now().plusMinutes(2);
+					LocalDateTime lockOutEndTime = LocalDateTime.now()
+							.plusHours(environment.getProperty("lockout.time.duration.hours", Long.class));
 					keyDetails.setTrackingStartTime(lockOutEndTime);
 					keyDetails.setConsecutiveAttemptCount(0);
 					keyDetailsRepository.save(keyDetails);
@@ -339,26 +342,6 @@ public class UserServiceImplementation implements UserService {
 							+ keyDetails.getTrackingStartTime());
 			return response;
 		}
-//		} else {
-//			// first login
-//			KeyDetails newLoginKey = new KeyDetails();
-//			String loginKey = UUID.randomUUID().toString();
-//			newLoginKey.setUserId(existingUser.getUserId());
-//			newLoginKey.setLoginKey(loginKey);
-//			newLoginKey.setKeyGenerationTime(LocalDateTime.now());
-//			newLoginKey.setTrackingStartTime(LocalDateTime.now());
-//			newLoginKey.setConsecutiveAttemptCount(1);
-//			loginKeysRepository.save(newLoginKey);
-//
-//			// sending email for login
-//			loginEmailServiceImplementation.sendEmailWithUrl(loginUserRecord.emailId(), "Check out this URL to verify",
-//					"http://localhost:8659/ipsator.com/open/user/final-login?loginKey=" + loginKey);
-//
-//			ServiceResponse<String> response = new ServiceResponse<>(true,
-//					"Email sent with login verification link to the email id: "+loginUserRecord.emailId()+". It will expire after 15 minutes!",
-//					"Email sent.");
-//			return response;
-//		}
 	}
 
 	/**
@@ -397,6 +380,13 @@ public class UserServiceImplementation implements UserService {
 		return response;
 	}
 
+	/**
+	 * Retrieves a list of all users from the database.
+	 *
+	 * @return A {@link ServiceResponse} containing the list of users if found, or
+	 *         an empty list if no users are found. The response status and message
+	 *         indicate the success or failure of the operation.
+	 */
 	@Override
 	public ServiceResponse<List<User>> getAllUsers() {
 		List<User> allUsers = userRepository.findAll();
@@ -408,6 +398,15 @@ public class UserServiceImplementation implements UserService {
 		return response;
 	}
 
+	/**
+	 * Updates the profile details of a user based on the provided
+	 * {@code setProfileDetailsRecord}.
+	 *
+	 * @param setProfileDetailsRecord The record containing the new profile details
+	 *                                to be set.
+	 * @return A {@code ServiceResponse} containing the updated user information if
+	 *         the operation is successful; otherwise, an appropriate error message.
+	 */
 	@Override
 	public ServiceResponse<User> setProfileDetails(SetProfileDetailsRecord setProfileDetailsRecord) {
 

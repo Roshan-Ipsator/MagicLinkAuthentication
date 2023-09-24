@@ -1,28 +1,27 @@
 package com.ipsator.MagicLinkAuthentication_System.Controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ipsator.MagicLinkAuthentication_System.Entity.User;
 import com.ipsator.MagicLinkAuthentication_System.Payload.ApiResponse;
-import com.ipsator.MagicLinkAuthentication_System.Payload.Error;
-import com.ipsator.MagicLinkAuthentication_System.Payload.ServiceResponse;
-import com.ipsator.MagicLinkAuthentication_System.Record.SetProfileDetailsRecord;
 import com.ipsator.MagicLinkAuthentication_System.Service.UserService;
 
+/**
+ * A controller class that contains API end point for Get All Users and can be
+ * accessible only by the Admins with admin:read authority
+ * 
+ * @author Roshan
+ *
+ */
 @RestController
 @RequestMapping("/ipsator.com/admin")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
+
 	@Autowired
 	private UserService userService;
 

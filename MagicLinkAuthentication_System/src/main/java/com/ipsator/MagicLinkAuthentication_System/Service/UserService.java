@@ -5,7 +5,6 @@ import java.util.List;
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
 import com.ipsator.MagicLinkAuthentication_System.Payload.ServiceResponse;
 import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
-import com.ipsator.MagicLinkAuthentication_System.Record.RegisterUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Record.SetProfileDetailsRecord;
 
 import jakarta.mail.MessagingException;
@@ -57,9 +56,35 @@ public interface UserService {
 	 * 
 	 */
 	public ServiceResponse<String> finalUserLogin(String loginKey);
-	
+
+	/**
+	 * Retrieves a list of all users from the service.
+	 *
+	 * This method sends a request to the service to retrieve a list of all users
+	 * currently available in the system. The result is encapsulated within a
+	 * {@link ServiceResponse} object, which provides information about the
+	 * operation's success or failure and the retrieved user data.
+	 *
+	 * @return A {@link ServiceResponse} containing a list of users if the operation
+	 *         is successful. If the operation fails, the response will indicate the
+	 *         error.
+	 *
+	 * @see ServiceResponse
+	 * @see User
+	 */
 	public ServiceResponse<List<User>> getAllUsers();
-	
+
+	/**
+	 * Sets and updates the profile details of a user based on the information
+	 * provided in the {@code SetProfileDetailsRecord}.
+	 *
+	 * @param setProfileDetailsRecord The record containing the updated profile
+	 *                                details for the user.
+	 * @return A {@code ServiceResponse} representing the result of setting the
+	 *         profile details. It encapsulates information about the success or
+	 *         failure of the operation, any error messages, and the updated user
+	 *         profile if the operation was successful.
+	 */
 	public ServiceResponse<User> setProfileDetails(SetProfileDetailsRecord setProfileDetailsRecord);
 
 }

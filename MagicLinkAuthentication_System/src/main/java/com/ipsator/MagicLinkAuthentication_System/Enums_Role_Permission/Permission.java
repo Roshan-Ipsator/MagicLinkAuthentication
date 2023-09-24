@@ -1,8 +1,13 @@
-package com.ipsator.MagicLinkAuthentication_System.Role_Permission;
+package com.ipsator.MagicLinkAuthentication_System.Enums_Role_Permission;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * An Enum to contain all available permissions
+ * 
+ * @author Roshan
+ */
 @RequiredArgsConstructor
 public enum Permission {
 	ADMIN_READ("admin:read"), ADMIN_UPDATE("admin:update"), ADMIN_CREATE("admin:create"), ADMIN_DELETE("admin:delete"),
