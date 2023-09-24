@@ -34,11 +34,7 @@ public class AdminController {
 	@GetMapping("/get-all-users")
 	@PreAuthorize("hasAuthority('admin:read')")
 	public ResponseEntity<ApiResponse> getAllUsers() {
-		ServiceResponse<List<User>> allUsersResponse = userService.getAllUsers();
-		if (allUsersResponse.getSuccess()) {
-			return new ResponseEntity<>(new ApiResponse("success", allUsersResponse.getData(), null), HttpStatus.OK);
-		}
-		return new ResponseEntity<>(new ApiResponse("error", null, new Error(allUsersResponse.getMessage())),
-				HttpStatus.BAD_REQUEST);
+		ResponseEntity<ApiResponse> getAllUsersResponseResponse = userService.getAllUsers().finalResponse();
+		return getAllUsersResponseResponse;
 	}
 }

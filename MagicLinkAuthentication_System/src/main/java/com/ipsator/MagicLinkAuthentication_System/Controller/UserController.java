@@ -41,24 +41,10 @@ import jakarta.validation.Valid;
 @PreAuthorize("hasRole('USER')")
 public class UserController {
 
-	
-
 	@GetMapping("/username")
 	@PreAuthorize("hasAuthority('user:read')")
 	public ResponseEntity<String> getUserName(Principal principal) {
 		return new ResponseEntity<>("Currently authenticated user's username: " + principal.getName(), HttpStatus.OK);
 	}
-
-//	@PutMapping("/update-user")
-//	@PreAuthorize("hasAuthority('user:update')")
-//	public ResponseEntity<ApiResponse> setProfileDetails(@RequestBody SetProfileDetailsRecord setProfileDetailsRecord) {
-//		ServiceResponse<User> response = userService.setProfileDetails(setProfileDetailsRecord);
-//
-//		if (response.getSuccess()) {
-//			return new ResponseEntity<>(new ApiResponse("success", response.getData(), null), HttpStatus.OK);
-//		}
-//		return new ResponseEntity<>(new ApiResponse("error", null, new Error(response.getMessage())),
-//				HttpStatus.BAD_REQUEST);
-//	}
 
 }

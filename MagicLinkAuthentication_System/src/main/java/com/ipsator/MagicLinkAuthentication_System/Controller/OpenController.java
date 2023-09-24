@@ -35,12 +35,9 @@ public class OpenController {
 	@GetMapping("/registration")
 	public ResponseEntity<ApiResponse> finalUserRegistration(@RequestParam String emailId,
 			@RequestParam String registrationKey) {
-		ServiceResponse<User> savedUser = userService.userRegistration(emailId, registrationKey);
-		if (savedUser.getSuccess()) {
-			return new ResponseEntity<>(new ApiResponse("success", savedUser.getData(), null), HttpStatus.CREATED);
-		}
-		return new ResponseEntity<>(new ApiResponse("error", null, new Error(savedUser.getMessage())),
-				HttpStatus.BAD_REQUEST);
+		ResponseEntity<ApiResponse> savedUserResponse = userService.userRegistration(emailId, registrationKey)
+				.finalResponse();
+		return savedUserResponse;
 	}
 
 	/**
@@ -53,13 +50,9 @@ public class OpenController {
 	@PostMapping("/pre-final-login")
 	public ResponseEntity<ApiResponse> preFinalUserLogin(@RequestBody LoginUserRecord loginUserRecord)
 			throws MessagingException {
-		ServiceResponse<String> loginKeyConfirmation = userService.preFinalUserLogin(loginUserRecord);
-		if (loginKeyConfirmation.getSuccess()) {
-			return new ResponseEntity<>(new ApiResponse("success", loginKeyConfirmation.getData(), null),
-					HttpStatus.OK);
-		}
-		return new ResponseEntity<>(new ApiResponse("error", null, new Error(loginKeyConfirmation.getMessage())),
-				HttpStatus.BAD_REQUEST);
+		ResponseEntity<ApiResponse> loginKeyConfirmationResponse = userService.preFinalUserLogin(loginUserRecord)
+				.finalResponse();
+		return loginKeyConfirmationResponse;
 	}
 
 	/**
@@ -70,11 +63,7 @@ public class OpenController {
 	 */
 	@GetMapping("/final-login")
 	public ResponseEntity<ApiResponse> userLoginFinal(@RequestParam String loginKey) {
-		ServiceResponse<String> loggedInUser = userService.finalUserLogin(loginKey);
-		if (loggedInUser.getSuccess()) {
-			return new ResponseEntity<>(new ApiResponse("success", loggedInUser.getData(), null), HttpStatus.OK);
-		}
-		return new ResponseEntity<>(new ApiResponse("error", null, new Error(loggedInUser.getMessage())),
-				HttpStatus.BAD_REQUEST);
+		ResponseEntity<ApiResponse> loggedInUserResponse = userService.finalUserLogin(loginKey).finalResponse();
+		return loggedInUserResponse;
 	}
 }
