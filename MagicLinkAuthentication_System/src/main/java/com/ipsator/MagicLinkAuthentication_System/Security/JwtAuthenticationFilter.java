@@ -27,7 +27,6 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
 	private Logger logger = LoggerFactory.getLogger(OncePerRequestFilter.class);
 
 	@Autowired
@@ -60,10 +59,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				logger.info("Illegal Argument while fetching the username !!");
 				e.printStackTrace();
 			} catch (ExpiredJwtException e) {
-				logger.info("Given jwt token is expired !!");
+				logger.info("Given jwt token has expired !!");
 				e.printStackTrace();
 			} catch (MalformedJwtException e) {
-				logger.info("Some changes has been done in token !! Invalid Token");
+				logger.info("Some changes have been done in token !! Invalid Token");
 				e.printStackTrace();
 			} catch (Exception e) {
 				e.printStackTrace();

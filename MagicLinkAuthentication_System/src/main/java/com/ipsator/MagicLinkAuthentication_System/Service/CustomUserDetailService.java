@@ -23,7 +23,6 @@ import com.ipsator.MagicLinkAuthentication_System.Repository.UserRepository;
  */
 @Service
 public class CustomUserDetailService implements UserDetailsService {
-
 	@Autowired
 	private UserRepository userRepository;
 

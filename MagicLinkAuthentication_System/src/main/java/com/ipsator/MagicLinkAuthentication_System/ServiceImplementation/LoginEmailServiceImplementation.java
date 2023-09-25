@@ -19,6 +19,7 @@ import jakarta.mail.internet.MimeMessage;
  */
 @Service
 public class LoginEmailServiceImplementation {
+	
 	@Autowired
 	private JavaMailSender emailSender;
 

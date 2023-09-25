@@ -11,7 +11,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication
 public class MagicLinkAuthenticationSystemApplication {
-
 	/**
 	 * The main method to run the application
 	 * 

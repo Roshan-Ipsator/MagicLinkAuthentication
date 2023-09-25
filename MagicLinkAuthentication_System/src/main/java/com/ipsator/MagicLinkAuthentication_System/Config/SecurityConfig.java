@@ -16,8 +16,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.ipsator.MagicLinkAuthentication_System.Security.JwtAuthenticationEntryPoint;
 import com.ipsator.MagicLinkAuthentication_System.Security.JwtAuthenticationFilter;
 
-import lombok.RequiredArgsConstructor;
-
 /**
  * A configuration class that contains beans of SecurityFilterChain and
  * DaoAuthenticationProvider
@@ -37,7 +35,8 @@ public class SecurityConfig {
 	private UserDetailsService userDetailsService;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-
+	
+	
 	/**
 	 * A bean declaration of SecurityFilterChain
 	 * 
@@ -51,8 +50,8 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
 		http.csrf(csrf -> csrf.disable()).cors(cors -> cors.disable())
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/ipsator.com/open/user/**").permitAll().anyRequest()
-						.authenticated())
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/ipsator.com/open/user/**").permitAll()
+						.anyRequest().authenticated())
 				.exceptionHandling(ex -> ex.authenticationEntryPoint(point))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
