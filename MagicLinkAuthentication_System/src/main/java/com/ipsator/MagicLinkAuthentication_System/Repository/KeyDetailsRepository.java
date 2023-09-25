@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import com.ipsator.MagicLinkAuthentication_System.Entity.KeyDetails;
 
+
 /**
  * A repository for KeyDetails
  * 

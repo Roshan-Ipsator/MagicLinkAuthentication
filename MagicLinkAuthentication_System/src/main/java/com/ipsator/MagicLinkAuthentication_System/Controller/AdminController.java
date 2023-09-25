@@ -21,7 +21,6 @@ import com.ipsator.MagicLinkAuthentication_System.Service.UserService;
 @RequestMapping("/ipsator.com/admin")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
-
 	@Autowired
 	private UserService userService;
 

@@ -35,7 +35,8 @@ public class SecurityConfig {
 	private UserDetailsService userDetailsService;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-
+	
+	
 	/**
 	 * A bean declaration of SecurityFilterChain
 	 * 

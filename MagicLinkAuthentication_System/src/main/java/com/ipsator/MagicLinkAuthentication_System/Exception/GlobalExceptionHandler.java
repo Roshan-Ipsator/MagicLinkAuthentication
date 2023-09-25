@@ -18,7 +18,6 @@ import org.springframework.web.servlet.NoHandlerFoundException;
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {
-
 	/**
 	 * Exception handler method that handles exceptions of type {@link Exception}.
 	 * It constructs an {@link ErrorDetails} object with information about the

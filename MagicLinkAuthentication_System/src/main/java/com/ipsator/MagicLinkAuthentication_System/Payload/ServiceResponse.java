@@ -1,5 +1,7 @@
 package com.ipsator.MagicLinkAuthentication_System.Payload;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -16,6 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ServiceResponse<T> {
+	
 	private Boolean success;
 	private T data;
 	private String message;

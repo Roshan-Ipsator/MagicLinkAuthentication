@@ -36,6 +36,7 @@ import jakarta.mail.MessagingException;
  */
 @Service
 public class UserServiceImplementation implements UserService {
+	
 	@Autowired
 	private UserRepository userRepository;
 

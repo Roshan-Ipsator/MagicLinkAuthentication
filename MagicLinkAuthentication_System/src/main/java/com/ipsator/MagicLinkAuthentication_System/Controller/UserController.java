@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/ipsator.com/user")
 @PreAuthorize("hasRole('USER')")
 public class UserController {
-
 	/**
 	 * API end point for getting username of current authenticated user
 	 * 

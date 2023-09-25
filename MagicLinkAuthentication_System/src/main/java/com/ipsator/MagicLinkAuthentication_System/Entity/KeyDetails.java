@@ -20,6 +20,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 public class KeyDetails {
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer userId;

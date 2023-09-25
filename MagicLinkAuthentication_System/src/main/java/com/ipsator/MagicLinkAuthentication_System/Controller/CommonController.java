@@ -25,7 +25,6 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/ipsator.com/common")
 public class CommonController {
-
 	@Autowired
 	private UserService userService;
 

@@ -17,7 +17,6 @@ import jakarta.mail.MessagingException;
  *
  */
 public interface UserService {
-
 	/**
 	 * 
 	 * The method to finally register a user after final verification

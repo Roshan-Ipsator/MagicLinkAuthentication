@@ -26,6 +26,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 public class User implements UserDetails {
+	
 	@Id
 	private Integer userId;
 

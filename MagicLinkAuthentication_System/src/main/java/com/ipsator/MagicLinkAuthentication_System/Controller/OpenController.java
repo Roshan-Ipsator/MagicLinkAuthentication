@@ -25,7 +25,6 @@ import jakarta.mail.MessagingException;
 @RestController
 @RequestMapping("/ipsator.com/open/user")
 public class OpenController {
-
 	@Autowired
 	private UserService userService;
 

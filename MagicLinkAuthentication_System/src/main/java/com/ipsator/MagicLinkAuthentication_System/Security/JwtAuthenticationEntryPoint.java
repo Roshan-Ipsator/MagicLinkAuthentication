@@ -18,7 +18,6 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
-
 	/**
 	 * method for initiating the authentication process when an unauthenticated user
 	 * attempts to access a protected resource
