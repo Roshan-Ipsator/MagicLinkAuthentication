@@ -23,7 +23,8 @@ import jakarta.validation.Valid;
  *
  */
 @RestController
-@RequestMapping("/ipsator.com/common")
+@RequestMapping("/common")
+@PreAuthorize("hasAnyRole('USER_ALL_ACCESS', 'USER_DEFAULT_ACCESS', 'ADMIN_ALL_ACCESS','ADMIN_DEFAULT_ACCESS')")
 public class CommonController {
 	@Autowired
 	private UserService userService;
@@ -35,7 +36,7 @@ public class CommonController {
 	 *         user details as its data
 	 */
 	@PutMapping("/update-user")
-	@PreAuthorize("hasAnyRole('USER_ALL_ACCESS', 'USER_UPDATE_ACCESS', 'ADMIN_ALL_ACCESS','ADMIN_UPDATE_ACCESS')")
+	@PreAuthorize("hasAnyAuthority('ADMIN_UPDATE', 'USER_UPDATE')")
 	public ResponseEntity<ApiResponse> setProfileDetails(
 			@Valid @RequestBody SetProfileDetailsRecord setProfileDetailsRecord) {
 		ResponseEntity<ApiResponse> setProfileDetailsResponse = userService.setProfileDetails(setProfileDetailsRecord)

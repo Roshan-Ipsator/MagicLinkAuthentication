@@ -23,24 +23,10 @@ import jakarta.mail.MessagingException;
  *
  */
 @RestController
-@RequestMapping("/ipsator.com/open/user")
+@RequestMapping("/open/user")
 public class OpenController {
 	@Autowired
 	private UserService userService;
-
-	/**
-	 * API end point for User Registration
-	 * 
-	 * @param registrationKey a String
-	 * @return ResponseEntity object
-	 */
-	@GetMapping("/registration")
-	public ResponseEntity<ApiResponse> finalUserRegistration(@RequestParam String emailId,
-			@RequestParam String registrationKey) {
-		ResponseEntity<ApiResponse> savedUserResponse = userService.userRegistration(emailId, registrationKey)
-				.finalResponse();
-		return savedUserResponse;
-	}
 
 	/**
 	 * API end point for Pre-final User Login

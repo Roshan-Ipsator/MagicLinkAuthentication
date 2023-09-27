@@ -35,8 +35,7 @@ public class SecurityConfig {
 	private UserDetailsService userDetailsService;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-	
-	
+
 	/**
 	 * A bean declaration of SecurityFilterChain
 	 * 
@@ -50,7 +49,7 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
 		http.csrf(csrf -> csrf.disable()).cors(cors -> cors.disable())
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/ipsator.com/open/user/**").permitAll()
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/open/user/**").permitAll()
 						.anyRequest().authenticated())
 				.exceptionHandling(ex -> ex.authenticationEntryPoint(point))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

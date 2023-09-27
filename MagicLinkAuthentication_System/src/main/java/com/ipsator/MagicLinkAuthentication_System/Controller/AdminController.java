@@ -18,8 +18,8 @@ import com.ipsator.MagicLinkAuthentication_System.Service.UserService;
  *
  */
 @RestController
-@RequestMapping("/ipsator.com/admin")
-@PreAuthorize("hasRole('ADMIN')")
+@RequestMapping("/admin")
+@PreAuthorize("hasAnyRole('ADMIN_ALL_ACCESS','ADMIN_DEFAULT_ACCESS', 'ADMIN_READ_ACCESS')")
 public class AdminController {
 	@Autowired
 	private UserService userService;
@@ -30,7 +30,7 @@ public class AdminController {
 	 * @return List of users
 	 */
 	@GetMapping("/get-all-users")
-	@PreAuthorize("hasAuthority('admin:read')")
+	@PreAuthorize("hasAuthority('ADMIN_READ')")
 	public ResponseEntity<ApiResponse> getAllUsers() {
 		ResponseEntity<ApiResponse> getAllUsersResponseResponse = userService.getAllUsers().finalResponse();
 		return getAllUsersResponseResponse;
