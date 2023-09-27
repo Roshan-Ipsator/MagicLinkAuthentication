@@ -28,7 +28,7 @@ public interface UserService {
 	 * @throws UserException
 	 * 
 	 */
-	public ServiceResponse<User> userRegistration(String emailId, String registrationKey);
+//	public ServiceResponse<User> userRegistration(String emailId, String registrationKey);
 
 	/**
 	 * 

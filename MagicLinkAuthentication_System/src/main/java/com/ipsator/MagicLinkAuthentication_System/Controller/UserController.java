@@ -17,8 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  */
 @RestController
-@RequestMapping("/ipsator.com/user")
-@PreAuthorize("hasRole('USER')")
+@RequestMapping("/user")
 public class UserController {
 	/**
 	 * API end point for getting username of current authenticated user
@@ -26,8 +25,7 @@ public class UserController {
 	 * @param principal a Principal obejct
 	 * @return ResponseEntity object
 	 */
-	@GetMapping("/username")
-	@PreAuthorize("hasAuthority('user:read')")
+	@GetMapping
 	public ResponseEntity<String> getUserName(Principal principal) {
 		return new ResponseEntity<>("Currently authenticated user's username: " + principal.getName(), HttpStatus.OK);
 	}

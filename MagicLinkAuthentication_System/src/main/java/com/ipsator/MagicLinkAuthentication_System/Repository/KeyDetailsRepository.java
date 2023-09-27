@@ -1,10 +1,11 @@
 package com.ipsator.MagicLinkAuthentication_System.Repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.ipsator.MagicLinkAuthentication_System.Entity.KeyDetails;
-
 
 /**
  * A repository for KeyDetails
@@ -12,7 +13,7 @@ import com.ipsator.MagicLinkAuthentication_System.Entity.KeyDetails;
  * @author Roshan
  */
 @Repository
-public interface KeyDetailsRepository extends JpaRepository<KeyDetails, Integer> {
+public interface KeyDetailsRepository extends JpaRepository<KeyDetails, Long> {
 
 	/**
 	 * Retrieves key details based on the provided sign-up/login key.
@@ -21,7 +22,7 @@ public interface KeyDetailsRepository extends JpaRepository<KeyDetails, Integer>
 	 * @return KeyDetails object containing details associated with the key, or null
 	 *         if no matching key is found.
 	 */
-	KeyDetails findBySignUpLogInKey(String key);
+	KeyDetails findByLogInKey(String key);
 
 	/**
 	 * Retrieves key details associated with a specific email address.
@@ -30,5 +31,5 @@ public interface KeyDetailsRepository extends JpaRepository<KeyDetails, Integer>
 	 * @return A {@code KeyDetails} object representing the key details associated
 	 *         with the email address, or {@code null} if no key details are found.
 	 */
-	KeyDetails findByEmailId(String emailId);
+	Optional<KeyDetails> findByEmailId(String emailId);
 }

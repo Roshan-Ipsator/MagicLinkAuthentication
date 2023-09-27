@@ -18,29 +18,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ServiceResponse<T> {
-	
+
 	private Boolean success;
 	private T data;
 	private String message;
 
 	public ResponseEntity<ApiResponse> finalResponse() {
-		if (this.getSuccess()) {
-			ApiResponse apiResponse = new ApiResponse();
-			apiResponse.setStatus("success");
-			apiResponse.setData(this.data);
-			apiResponse.setError(null);
+		if (this.success) {
+			ApiResponse apiResponse = new ApiResponse("success", this.data, null);
 
 			return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.OK);
-
 		} else {
-			ApiResponse apiResponse = new ApiResponse();
-			apiResponse.setStatus("error");
-			apiResponse.setData(null);
-
 			Error error = new Error();
 			error.setMessage(this.message);
 
-			apiResponse.setError(error);
+			ApiResponse apiResponse = new ApiResponse("error", null, error);
 
 			return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.BAD_REQUEST);
 		}

@@ -13,7 +13,7 @@ import com.ipsator.MagicLinkAuthentication_System.Entity.User;
  * @author Roshan
  */
 @Repository
-public interface UserRepository extends JpaRepository<User, Integer> {
+public interface UserRepository extends JpaRepository<User, Long> {
 	
 	/**
 	 * Retrieves an {@link java.util.Optional} containing a {@link User} entity

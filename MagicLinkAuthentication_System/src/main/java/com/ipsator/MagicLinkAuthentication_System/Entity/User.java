@@ -2,16 +2,24 @@ package com.ipsator.MagicLinkAuthentication_System.Entity;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.ipsator.MagicLinkAuthentication_System.Enums_Role_Permission.Role;
+//import com.ipsator.MagicLinkAuthentication_System.Enums_Role_Permission.Role;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,30 +34,39 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 public class User implements UserDetails {
-	
+
 	@Id
-	private Integer userId;
+	private Long id;
 
 	private String firstName;
 
 	private String lastName;
 
+	@Column(unique = true)
 	private String emailId;
 
 	private String gender;
 
 	private Integer age;
 
-	@Enumerated(EnumType.STRING)
-	private Role role;
+//	@Enumerated(EnumType.STRING)
+//	private Role role;
 
-	private LocalDateTime userRegistrationTime;
+	private LocalDateTime userCreationTime;
 
 	private LocalDateTime userUpdationTime;
 
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	private Role role;
+
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return role.getAuthorities();
+		Set<GrantedAuthority> authorities = new HashSet<>();
+		for (Permission permission : role.getPermissions()) {
+			authorities.add(new SimpleGrantedAuthority(permission.getName()));
+		}
+		authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+		return authorities;
 	}
 
 	@Override
