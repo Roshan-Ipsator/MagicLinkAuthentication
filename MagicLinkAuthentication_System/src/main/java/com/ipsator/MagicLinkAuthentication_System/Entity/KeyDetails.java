@@ -21,15 +21,26 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 public class KeyDetails {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	
+
 	@Column(unique = true)
 	private String emailId;
 	private String logInKey;
 	private LocalDateTime keyGenerationTime;
 	private Integer consecutiveAttemptCount;
 	private LocalDateTime trackingStartTime;
+
+	public KeyDetails(String emailId, String logInKey, LocalDateTime keyGenerationTime, Integer consecutiveAttemptCount,
+			LocalDateTime trackingStartTime) {
+		super();
+		this.emailId = emailId;
+		this.logInKey = logInKey;
+		this.keyGenerationTime = keyGenerationTime;
+		this.consecutiveAttemptCount = consecutiveAttemptCount;
+		this.trackingStartTime = trackingStartTime;
+	}
+
 }

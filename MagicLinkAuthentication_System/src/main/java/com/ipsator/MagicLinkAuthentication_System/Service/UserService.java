@@ -17,18 +17,6 @@ import jakarta.mail.MessagingException;
  *
  */
 public interface UserService {
-	/**
-	 * 
-	 * The method to finally register a user after final verification
-	 * 
-	 * @param registrationKey a string to verify the user for complete registration
-	 * 
-	 * @return User object
-	 * 
-	 * @throws UserException
-	 * 
-	 */
-//	public ServiceResponse<User> userRegistration(String emailId, String registrationKey);
 
 	/**
 	 * 
@@ -85,5 +73,10 @@ public interface UserService {
 	 *         profile if the operation was successful.
 	 */
 	public ServiceResponse<User> setProfileDetails(SetProfileDetailsRecord setProfileDetailsRecord);
+
+	/**
+	 * Creates a new administrative user with full access privileges.
+	 */
+	public ServiceResponse<User> createAdminWithAllAccess();
 
 }

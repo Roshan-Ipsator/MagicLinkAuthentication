@@ -3,9 +3,14 @@ package com.ipsator.MagicLinkAuthentication_System.Security;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ipsator.MagicLinkAuthentication_System.Payload.ApiResponse;
+import com.ipsator.MagicLinkAuthentication_System.Payload.Error;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,8 +35,23 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 	public void commence(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException authException) throws IOException, ServletException {
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+		ApiResponse apiResponse = new ApiResponse();
+		apiResponse.setStatus("error");
+		apiResponse.setData(null);
+		Error error = new Error();
+		error.setMessage("Access Denied !! " + authException.getMessage());
+		apiResponse.setError(error);
+
+		// Serialize the JSON response
+		ObjectMapper objectMapper = new ObjectMapper();
+		String jsonResponse = objectMapper.writeValueAsString(apiResponse);
+
+		// Set the response content type to JSON
+		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
 		PrintWriter writer = response.getWriter();
-		writer.println("Access Denied !! " + authException.getMessage());
+		writer.println(jsonResponse);
 
 	}
 

@@ -29,6 +29,24 @@ public class OpenController {
 	private UserService userService;
 
 	/**
+	 * Creates a new admin user with full access and privileges.
+	 *
+	 * This endpoint allows the creation of an administrator user account with
+	 * all-access privileges. An administrator with full access typically has the
+	 * highest level of control and permissions within the application.
+	 *
+	 * @return A ResponseEntity containing an ApiResponse with the result of the
+	 *         creation operation. The ApiResponse includes information about the
+	 *         success or failure of the operation, along with any relevant status
+	 *         codes and messages.
+	 *
+	 */
+	@PostMapping
+	public ResponseEntity<ApiResponse> createAdminWithAllAccess() {
+		return userService.createAdminWithAllAccess().finalResponse();
+	}
+
+	/**
 	 * API end point for Pre-final User Login
 	 * 
 	 * @param loginUserRecord object of LoginUserRecord

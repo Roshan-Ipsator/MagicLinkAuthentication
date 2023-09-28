@@ -1,10 +1,8 @@
 package com.ipsator.MagicLinkAuthentication_System.ServiceImplementation;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +33,13 @@ public class RoleServiceImplementation implements RoleService {
 	@Autowired
 	private UserRepository userRepository;
 
+	/**
+	 * Creates a new role based on the provided {@code createRoleRecord}.
+	 *
+	 * @param createRoleRecord The record containing information to create the role.
+	 * @return A {@code ServiceResponse} containing the created role if successful,
+	 *         or an error message if the creation fails.
+	 */
 	@Override
 	public ServiceResponse<Role> createRole(CreateRoleRecord createRoleRecord) {
 
@@ -66,6 +71,23 @@ public class RoleServiceImplementation implements RoleService {
 		return response;
 	}
 
+	/**
+	 * Adds a permission to an existing role or creates the permission and
+	 * associates it with the role if it doesn't already exist.
+	 *
+	 * @param addPermissionToRoleRecord The record containing the role name and
+	 *                                  permission name to be added.
+	 * @return A ServiceResponse indicating the outcome of the operation. - If the
+	 *         role exists and the permission is successfully added, the response is
+	 *         marked as successful, and it contains the updated Role entity with
+	 *         the added permission. - If the permission name is invalid or the role
+	 *         already has the requested permission, the response is marked as
+	 *         unsuccessful, and it contains an error message. - If the role doesn't
+	 *         exist in the database, the response is marked as unsuccessful, and it
+	 *         contains an error message prompting the user to first create the
+	 *         role.
+	 * 
+	 */
 	@Override
 	public ServiceResponse<Role> addPermissionToRole(AddPermissionToRoleRecord addPermissionToRoleRecord) {
 
@@ -82,7 +104,8 @@ public class RoleServiceImplementation implements RoleService {
 			Role existingRole = roleOptional.get();
 
 			// check if the provided permission already exists or not
-			Optional<Permission> permissionOptional = permissionRepository.findByName(addPermissionToRoleRecord.permissionName());
+			Optional<Permission> permissionOptional = permissionRepository
+					.findByName(addPermissionToRoleRecord.permissionName());
 
 			// if provided permission already exists
 			if (permissionOptional.isPresent()) {
@@ -102,11 +125,6 @@ public class RoleServiceImplementation implements RoleService {
 				permissions.add(existingPermission);
 				existingRole.setPermissions(permissions);
 
-				// associate the role with permission
-				List<Role> roles = existingPermission.getRoles();
-				roles.add(existingRole);
-				existingPermission.setRoles(roles);
-
 				Role savedRole = roleRepository.save(existingRole);
 
 				ServiceResponse<Role> response = new ServiceResponse<>(true, savedRole,
@@ -121,16 +139,7 @@ public class RoleServiceImplementation implements RoleService {
 
 			Permission savedPermission = permissionRepository.save(newPermission);
 
-			List<Role> roles = savedPermission.getRoles();
-			if (roles == null) {
-				List<Role> roleList = new ArrayList<>();
-				roleList.add(existingRole);
-				savedPermission.setRoles(roleList);
-			} else {
-				roles.add(existingRole);
-				savedPermission.setRoles(roles);
-			}
-
+			// associating the permission with role
 			List<Permission> permissions = existingRole.getPermissions();
 			if (permissions == null) {
 				List<Permission> permissionList = new ArrayList<>();
@@ -148,11 +157,19 @@ public class RoleServiceImplementation implements RoleService {
 
 		}
 		ServiceResponse<Role> response = new ServiceResponse<>(false, null,
-				"Invalid role name passed. Please, try again!");
+				"Role doesn't exist in database, yet.! First create the role.");
 		return response;
 
 	}
 
+	/**
+	 * Updates the role of a user based on the provided {@link UpdateRoleRecord}.
+	 *
+	 * @param updateRoleRecord The record containing user email and the new role.
+	 * @return A {@link ServiceResponse} with the updated user and a success message
+	 *         if the role update is successful, or an error message if the update
+	 *         fails due to invalid input, an existing role, or an invalid email.
+	 */
 	@Override
 	public ServiceResponse<User> updateRole(UpdateRoleRecord updateRoleRecord) {
 		// find user by email id

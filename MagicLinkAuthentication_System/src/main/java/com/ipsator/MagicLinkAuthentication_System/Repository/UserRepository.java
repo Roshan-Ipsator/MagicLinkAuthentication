@@ -14,7 +14,7 @@ import com.ipsator.MagicLinkAuthentication_System.Entity.User;
  */
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-	
+
 	/**
 	 * Retrieves an {@link java.util.Optional} containing a {@link User} entity
 	 * based on the provided email ID.
