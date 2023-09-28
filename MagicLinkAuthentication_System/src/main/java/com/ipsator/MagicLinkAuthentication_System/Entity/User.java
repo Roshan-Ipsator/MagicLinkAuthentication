@@ -9,16 +9,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-//import com.ipsator.MagicLinkAuthentication_System.Enums_Role_Permission.Role;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -49,15 +44,27 @@ public class User implements UserDetails {
 
 	private Integer age;
 
-//	@Enumerated(EnumType.STRING)
-//	private Role role;
-
 	private LocalDateTime userCreationTime;
 
 	private LocalDateTime userUpdationTime;
 
+	/**
+	 * The user's role in the application.
+	 */
 	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private Role role;
+
+	public User(Long id, String firstName, String lastName, String emailId, String gender, Integer age,
+			LocalDateTime userCreationTime) {
+		super();
+		this.id = id;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.emailId = emailId;
+		this.gender = gender;
+		this.age = age;
+		this.userCreationTime = userCreationTime;
+	}
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {

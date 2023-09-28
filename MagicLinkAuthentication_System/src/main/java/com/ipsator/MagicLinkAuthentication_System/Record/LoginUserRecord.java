@@ -6,5 +6,5 @@ package com.ipsator.MagicLinkAuthentication_System.Record;
  * @author Roshan
  */
 public record LoginUserRecord(String emailId) {
-	
+
 }

@@ -2,6 +2,7 @@ package com.ipsator.MagicLinkAuthentication_System.ServiceImplementation;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -11,13 +12,16 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.ipsator.MagicLinkAuthentication_System.Entity.KeyDetails;
+import com.ipsator.MagicLinkAuthentication_System.Entity.Permission;
 import com.ipsator.MagicLinkAuthentication_System.Entity.Role;
 import com.ipsator.MagicLinkAuthentication_System.Entity.User;
+import com.ipsator.MagicLinkAuthentication_System.Enums_Role_Permission.PermissionEnum;
 import com.ipsator.MagicLinkAuthentication_System.Enums_Role_Permission.RoleEnum;
 import com.ipsator.MagicLinkAuthentication_System.Payload.ServiceResponse;
 import com.ipsator.MagicLinkAuthentication_System.Record.LoginUserRecord;
 import com.ipsator.MagicLinkAuthentication_System.Record.SetProfileDetailsRecord;
 import com.ipsator.MagicLinkAuthentication_System.Repository.KeyDetailsRepository;
+import com.ipsator.MagicLinkAuthentication_System.Repository.PermissionRepository;
 import com.ipsator.MagicLinkAuthentication_System.Repository.RoleRepository;
 import com.ipsator.MagicLinkAuthentication_System.Repository.UserRepository;
 import com.ipsator.MagicLinkAuthentication_System.Security.JwtHelper;
@@ -59,6 +63,9 @@ public class UserServiceImplementation implements UserService {
 
 	@Autowired
 	private RoleRepository roleRepository;
+
+	@Autowired
+	private PermissionRepository permissionRepository;
 
 	/**
 	 * 
@@ -154,13 +161,9 @@ public class UserServiceImplementation implements UserService {
 		}
 
 		// first login attempt and not a registered user
-		KeyDetails newKeyDetails = new KeyDetails();
-		newKeyDetails.setEmailId(loginUserRecord.emailId());
 		String logInKey = UUID.randomUUID().toString();
-		newKeyDetails.setLogInKey(logInKey);
-		newKeyDetails.setKeyGenerationTime(LocalDateTime.now());
-		newKeyDetails.setTrackingStartTime(LocalDateTime.now());
-		newKeyDetails.setConsecutiveAttemptCount(1);
+		KeyDetails newKeyDetails = new KeyDetails(loginUserRecord.emailId(), logInKey, LocalDateTime.now(), 1,
+				LocalDateTime.now());
 		keyDetailsRepository.save(newKeyDetails);
 
 		// sending email for login
@@ -228,13 +231,13 @@ public class UserServiceImplementation implements UserService {
 			newUser.setUserCreationTime(LocalDateTime.now());
 
 			// set the user role
-			Optional<Role> roleOptional = roleRepository.findByName("ADMIN_WRITE_ACCESS");
+			Optional<Role> roleOptional = roleRepository.findByName(RoleEnum.USER_DEFAULT_ACCESS.name());
 			if (roleOptional.isPresent()) {
 				Role role = roleOptional.get();
 				newUser.setRole(role);
 			} else {
 				Role newRole = new Role();
-				newRole.setName("ADMIN_WRITE_ACCESS");
+				newRole.setName(RoleEnum.USER_DEFAULT_ACCESS.name());
 				Role savedRole = roleRepository.save(newRole);
 
 				newUser.setRole(savedRole);
@@ -341,4 +344,109 @@ public class UserServiceImplementation implements UserService {
 
 	}
 
+	/**
+	 * Creates an administrative user with full access rights (ADMIN_ALL_ACCESS) if
+	 * one does not already exist with the email address "admin@gmail.com". This
+	 * method is typically used during application initialization to ensure the
+	 * presence of an initial administrative user.
+	 *
+	 * @return A {@link ServiceResponse} containing the created user if successful,
+	 *         or a response indicating that the first admin user has already been
+	 *         created and can log in directly.
+	 */
+	@Override
+	public ServiceResponse<User> createAdminWithAllAccess() {
+		Optional<User> userOptional = userRepository.findByEmailId("admin@gmail.com");
+		if (userOptional.isEmpty()) {
+			// create a new user
+			User newUser = new User((long) 1, "Roshan", "Patro", "admin@gmail.com", "male", 30, LocalDateTime.now());
+
+			// set the role (ADMIN_ALL_ACCESS)
+			Optional<Role> roleOptional = roleRepository.findByName(RoleEnum.ADMIN_ALL_ACCESS.name());
+
+			if (roleOptional.isPresent()) {
+				Role role = roleOptional.get();
+				List<Permission> permissions = new ArrayList<>();
+				if (role.getPermissions() != null) {
+					permissions = role.getPermissions();
+				}
+
+				// set all the related permissions to the role
+				setAllPermissionsToFirstAdmin(newUser, permissions, role);
+			} else {
+				Role role = new Role();
+				role.setName(RoleEnum.ADMIN_ALL_ACCESS.name());
+				List<Permission> permissions = new ArrayList<>();
+				if (role.getPermissions() != null) {
+					permissions = role.getPermissions();
+				}
+
+				// set all the related permissions to the role
+				setAllPermissionsToFirstAdmin(newUser, permissions, role);
+
+			}
+
+			User savedUser = userRepository.save(newUser);
+
+			ServiceResponse<User> response = new ServiceResponse<>(true, savedUser,
+					"User with ADMIN_ALL_ACCESS created.");
+
+			return response;
+		}
+		ServiceResponse<User> response = new ServiceResponse<>(false, null,
+				"First admin already created and may directly login.");
+
+		return response;
+	}
+
+	/**
+	 * Sets all specified permissions for the first administrator user and assigns a
+	 * role to the user.
+	 *
+	 * @param newUser     The user to whom permissions and a role are assigned.
+	 * @param permissions A list of permissions to be granted to the user.
+	 * @param role        The role to be assigned to the user.
+	 */
+	public void setAllPermissionsToFirstAdmin(User newUser, List<Permission> permissions, Role role) {
+		// set permission ADMIN_CREATE
+		setPermissionToFirstAdmin(PermissionEnum.ADMIN_CREATE.name(), permissions, role);
+
+		// set permission ADMIN_READ
+		setPermissionToFirstAdmin(PermissionEnum.ADMIN_READ.name(), permissions, role);
+
+		// set permission ADMIN_UPDATE
+		setPermissionToFirstAdmin(PermissionEnum.ADMIN_UPDATE.name(), permissions, role);
+
+		// set permission ADMIN_DELETE
+		setPermissionToFirstAdmin(PermissionEnum.ADMIN_DELETE.name(), permissions, role);
+
+		newUser.setRole(role);
+	}
+
+	/**
+	 * Sets a permission for the first admin user in the specified role. If the
+	 * permission with the given name already exists, it is added to the role's
+	 * permissions. If the permission does not exist, it is created, saved to the
+	 * database, and then added to the role's permissions.
+	 *
+	 * @param permissionName The name of the permission to be added.
+	 * @param permissions    The list of existing permissions for the role.
+	 * @param role           The role to which the permission should be added.
+	 */
+	public void setPermissionToFirstAdmin(String permissionName, List<Permission> permissions, Role role) {
+		Optional<Permission> permissionOptional = permissionRepository.findByName(permissionName);
+		if (permissionOptional.isPresent()) {
+			Permission permission = permissionOptional.get();
+			if (!permissions.contains(permission)) {
+				permissions.add(permission);
+			}
+			role.setPermissions(permissions);
+		} else {
+			Permission permission = new Permission();
+			permission.setName(permissionName);
+			Permission savedPermission = permissionRepository.save(permission);
+			permissions.add(savedPermission);
+			role.setPermissions(permissions);
+		}
+	}
 }
