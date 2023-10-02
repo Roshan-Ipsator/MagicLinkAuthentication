@@ -1,5 +1,6 @@
 package com.ipsator.MagicLinkAuthentication_System.Exception;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 
 import org.springframework.http.HttpStatus;
