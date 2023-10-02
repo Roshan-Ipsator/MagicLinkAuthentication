@@ -1,5 +1,6 @@
 package com.ipsator.MagicLinkAuthentication_System.Security;
 
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 /**
  * A class that contains methods related to operation on JWT token line
@@ -23,7 +25,14 @@ public class JwtHelper {
 
 	public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
 
-	private String secret = "afafasfafafasfasfasfafacasdasfasxASFACASDFACASDFASFASFDAFASFASDAADSCSDFADCVSGCFVADXCcadwavfsfarvf";
+	// private String secret =
+	// "afafasfafafasfasfasfafacasdasfasxASFACASDFACASDFASFASFDAFASFASDAADSCSDFADCVSGCFVADXCcadwavfsfarvf";
+
+	// Generating a secure HS512 key
+	byte[] keyBytes = Keys.secretKeyFor(SignatureAlgorithm.HS512).getEncoded();
+
+	// Encoding the key as a Base64 string
+	private final String secret = Base64.getEncoder().encodeToString(keyBytes);
 
 	/**
 	 * A method to retrieve username from a jwt token
