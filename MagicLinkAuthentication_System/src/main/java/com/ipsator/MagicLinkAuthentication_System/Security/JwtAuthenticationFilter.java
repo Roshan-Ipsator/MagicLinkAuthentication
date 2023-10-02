@@ -1,6 +1,7 @@
 package com.ipsator.MagicLinkAuthentication_System.Security;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		String requestHeader = request.getHeader("Authorization");
+
+		// Generating a unique trace ID
+		String traceId = generateTraceId();
+
+		// Adding trace ID to log
+		logger.info("Trace ID: {} - Header: {}", traceId, requestHeader);
+
+		// Adding trace ID to request headers
+		request.setAttribute("TraceId", traceId);
+		
+		// After generating the trace ID, setting it in the response headers
+		response.setHeader("Trace-ID", traceId);
+
 		logger.info(" Header :  {}", requestHeader);
 		String username = null;
 		String token = null;
@@ -56,19 +70,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			try {
 				username = this.jwtHelper.getUsernameFromToken(token);
 			} catch (IllegalArgumentException e) {
-				logger.info("Illegal Argument while fetching the username !!");
+				logger.info("Trace ID: {} - Illegal Argument while fetching the username !!", traceId);
 				e.printStackTrace();
 			} catch (ExpiredJwtException e) {
-				logger.info("Given jwt token has expired !!");
+				logger.info("Trace ID: {} - Given jwt token has expired !!", traceId);
 				e.printStackTrace();
 			} catch (MalformedJwtException e) {
-				logger.info("Some changes have been done in token !! Invalid Token");
+				logger.info("Trace ID: {} - Some changes have been done in token !! Invalid Token", traceId);
 				e.printStackTrace();
 			} catch (Exception e) {
+				logger.info("Trace ID: {} - An exception occurred while processing the token", traceId);
 				e.printStackTrace();
 			}
 		} else {
-			logger.info("Invalid Header Value !! ");
+			logger.info("Trace ID: {} - Invalid Header Value !!", traceId);
 		}
 		if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 			// fetching user details from username
@@ -81,9 +96,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 				SecurityContextHolder.getContext().setAuthentication(authentication);
 			} else {
-				logger.info("Validation fails !!");
+				logger.info("Trace ID: {} - Validation fails !!", traceId);
 			}
 		}
 		filterChain.doFilter(request, response);
+	}
+
+	// Helper method to generate a unique trace ID
+	private String generateTraceId() {
+		return UUID.randomUUID().toString();
 	}
 }
